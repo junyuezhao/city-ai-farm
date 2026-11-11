@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <!-- PWA Core -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#16a34a" />
+  <meta name="application-name" content="城市AI农场" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="AI农场" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-48x48.png" />
+  <link rel="shortcut icon" href="assets/icons/favicon.ico" />
+
+  <!-- iOS Splash Screens (多尺寸适配) -->
+  <link rel="apple-touch-startup-image" href="assets/icons/icon-512x512.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/icon-384x384.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/icon-384x384.png" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/icon-192x192.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/icon-180x180.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/icon-180x180.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/icon-180x180.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/icon-180x180.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/icon-180x180.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="assets/icons/icon-180x180.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+
+  <!-- Microsoft Tile -->
+  <meta name="msapplication-TileColor" content="#16a34a" />
+  <meta name="msapplication-tap-highlight" content="no" />
+
+  <title>城市AI农场</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<!-- ==================== 自定义标题栏（仅桌面端显示） ==================== -->
+<div id="custom-titlebar" class="custom-titlebar">
+  <div class="titlebar-drag-region">
+    <div class="titlebar-left">
+      <img src="assets/icons/icon-48x48.png" class="titlebar-icon" alt="logo" />
+      <span class="titlebar-title">城市AI农场</span>
+    </div>
+    <div class="titlebar-right">
+      <button class="titlebar-btn titlebar-btn-minimize" id="btn-minimize" title="最小化">
+        <svg width="10" height="1" viewBox="0 0 10 1"><rect width="10" height="1" fill="currentColor"/></svg>
+      </button>
+      <button class="titlebar-btn titlebar-btn-maximize" id="btn-maximize" title="最大化">
+        <svg width="10" height="10" viewBox="0 0 10 10"><rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1"/></svg>
+      </button>
+      <button class="titlebar-btn titlebar-btn-close" id="btn-close" title="关闭">
+        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 1L9 9M9 1L1 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+
+  <!-- ==================== 首页 ==================== -->
+  <div id="page-home" class="page active">
+    <div class="home-banner">
+      <h2>🌱 城市AI农场</h2>
+      <p>认养一块地，收获一整年的快乐</p>
+    </div>
+    <div class="weather-widget">
+      <div>
+        <div class="temp">22°C</div>
+        <div class="info">晴转多云<br>东风3级 · 湿度45%</div>
+      </div>
+      <div style="font-size:48px;">⛅</div>
+    </div>
+    <div class="quick-actions">
+      <div class="quick-action" onclick="navigateTo('plots')"><span class="qa-icon">🌾</span><span>认养大厅</span></div>
+      <div class="quick-action" onclick="navigateTo('map')"><span class="qa-icon">🗺️</span><span>农场地图</span></div>
+      <div class="quick-action" onclick="navigateTo('ai')"><span class="qa-icon">🔍</span><span>AI识别</span></div>
+      <div class="quick-action" onclick="navigateTo('lessons')"><span class="qa-icon">📚</span><span>知识课堂</span></div>
+      <div class="quick-action" onclick="navigateTo('bookings')"><span class="qa-icon">📅</span><span>预约种养</span></div>
+      <div class="quick-action" onclick="navigateTo('diary')"><span class="qa-icon">📔</span><span>种植日记</span></div>
+      <div class="quick-action" onclick="navigateTo('community')"><span class="qa-icon">💬</span><span>农场社区</span></div>
+      <div class="quick-action" onclick="navigateTo('profile')"><span class="qa-icon">👤</span><span>我的</span></div>
+    </div>
+    <div class="section-title"><span>🌿 我的地块</span><a href="javascript:void(0)" onclick="navigateTo('plots')">查看全部 →</a></div>
+    <div id="home-my-plots"></div>
+    <div class="section-title"><span>🎉 近期活动</span><a href="javascript:void(0)" onclick="navigateTo('activities')">更多 →</a></div>
+    <div id="home-activities"></div>
+  </div>
+
+  <!-- ==================== 认养大厅 ==================== -->
+  <div id="page-plots" class="page">
+    <div class="topbar">
+      <h1>🌾 认养大厅</h1>
+      <div class="topbar-actions"><div class="icon-btn" onclick="navigateTo('home')">🏠</div></div>
+    </div>
+    <div class="filter-bar" id="plot-filters">
+      <div class="filter-chip active" data-filter="all">全部</div>
+      <div class="filter-chip" data-filter="available">可认养</div>
+      <div class="filter-chip" data-filter="tomato">🍅 番茄</div>
+      <div class="filter-chip" data-filter="strawberry">🍓 草莓</div>
+      <div class="filter-chip" data-filter="vegetable">🥬 蔬菜</div>
+      <div class="filter-chip" data-filter="flower">🌻 花卉</div>
+    </div>
+    <div id="plot-list"></div>
+  </div>
+
+  <!-- ==================== 农场地图 ==================== -->
+  <div id="page-map" class="page">
+    <div class="topbar">
+      <h1>🗺️ 农场地图</h1>
+      <div class="topbar-actions"><div class="icon-btn" onclick="navigateTo('home')">🏠</div></div>
+    </div>
+    <div class="map-container">
+      <div class="map-canvas" id="farm-map"></div>
+      <div class="map-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--sun-400)"></div>我已认养</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green-400)"></div>可认养</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--gray-300)"></div>已认满</div>
+      </div>
+    </div>
+    <div id="map-plot-detail" style="display:none;margin:12px 16px;"><div class="card" id="map-detail-card"></div></div>
+    <div style="padding:12px 16px;">
+      <div class="card" style="margin:0;">
+        <div style="font-size:14px;font-weight:700;margin-bottom:10px;">📍 区域说明</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--gray-700);">
+          <div>☀️ <strong>东区·阳光带</strong> — 日照充足，适合番茄、草莓等喜光作物</div>
+          <div>💧 <strong>中区·水肥带</strong> — 灌溉便利，适合叶菜类快速生长</div>
+          <div>🌾 <strong>西区·大田带</strong> — 面积广阔，适合瓜果、向日葵等大株作物</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 预约种养 ==================== -->
+  <div id="page-bookings" class="page">
+    <div class="topbar">
+      <h1>📅 预约种养</h1>
+      <div class="topbar-actions"><div class="icon-btn" onclick="navigateTo('home')">🏠</div></div>
+    </div>
+    <div class="section-title"><span>我的预约</span></div>
+    <div id="my-bookings"></div>
+    <div class="section-title"><span>✏️ 新建预约</span></div>
+    <div class="card">
+      <div class="input-group"><label>选择地块</label><select class="input-field" id="booking-plot"><option value="">-- 请选择 --</option></select></div>
+      <div class="input-group"><label>选择日期（提前1-7天）</label><div class="calendar-grid" id="calendar-grid"></div></div>
+      <div class="input-group">
+        <label>时间段</label>
+        <select class="input-field" id="booking-time">
+          <option value="09:00-11:00">上午 09:00-11:00</option>
+          <option value="14:00-16:00">下午 14:00-16:00</option>
+        </select>
+      </div>
+      <div class="input-group"><label>同行人数</label><input type="number" class="input-field" id="booking-people" value="1" min="1" max="10" /></div>
+      <div class="input-group">
+        <label>备注（饮食禁忌/特殊需求等）</label>
+        <textarea class="input-field" id="booking-note" placeholder="例如：有小朋友，不吃花生..."></textarea>
+      </div>
+      <button class="btn btn-primary btn-full btn-lg mt-12" onclick="submitBooking()">📤 提交预约申请</button>
+      <p style="font-size:12px;color:var(--gray-500);text-align:center;margin-top:8px;">* 预约免费，农场将在1个工作日内审核</p>
+    </div>
+  </div>
+
+  <!-- ==================== AI识别 ==================== -->
+  <div id="page-ai" class="page">
+    <div class="topbar">
+      <h1>🔍 AI作物识别</h1>
+      <div class="topbar-actions"><div class="icon-btn" onclick="navigateTo('home')">🏠</div></div>
+    </div>
+    <div style="padding:12px 16px;">
+      <div class="input-group" style="margin-bottom:0;">
+        <label>选择地块</label>
+        <select class="input-field" id="ai-plot-select"><option value="">-- 选择要识别的地块 --</option></select>
+      </div>
+    </div>
+    <div class="ai-scanner">
+      <div class="crop-image-wrap" id="crop-image-wrap" onclick="simulateScan()">
+        <img class="crop-image-img" id="crop-image-img" src="https://picsum.photos/seed/tomato1/400/400" alt="作物照片" draggable="false"/>
+        <div class="scan-hint" id="scan-hint">📷 点击图片开始AI识别</div>
+        <div class="crop-scan-line" id="crop-scan-line"></div>
+        <div class="scan-frame"><div class="corner-br"></div><div class="corner-bl"></div></div>
+        <div class="scan-grid"></div>
+      </div>
+      <svg class="connector-layer" id="connector-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <defs>
+          <marker id="arrowhead" markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto">
+            <polygon points="0 0, 6 2.5, 0 5" fill="#22c55e"/>
+          </marker>
+          <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#22c55e" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#86efac" stop-opacity="0.6"/>
+          </linearGradient>
+        </defs>
+        <path id="connector-path" class="connector-path" d="" marker-end="url(#arrowhead)"/>
+      </svg>
+      <div class="ai-panel" id="ai-panel">
+        <div class="ai-panel-title"><span class="ai-panel-icon">🤖</span><span>AI诊断报告</span></div>
+        <div class="ai-panel-body" id="ai-panel-body"></div>
+      </div>
+    </div>
+    <div id="ai-result" style="display:none;padding:0 16px;" aria-live="polite">
+      <div class="card">
+        <div style="font-size:16px;font-weight:700;margin-bottom:14px;">🤖 AI识别结果</div>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+          <div class="ai-score-ring"><div class="score-inner" id="ai-score-num">85</div></div>
+          <div>
+            <div style="font-size:14px;font-weight:700;">作物健康度</div>
+            <div style="font-size:13px;color:var(--gray-500);margin-top:4px;" id="ai-health-text">良好</div>
+            <div style="margin-top:8px;"><span class="tag tag-green">未发现病虫害</span></div>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="font-weight:600;">成熟度</span><span class="text-green" id="ai-maturity-text">65%</span></div>
+          <div class="progress-bar"><div class="fill" id="ai-maturity-bar" style="width:65%"></div></div>
+        </div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px;">💡 AI建议</div>
+        <div id="ai-advice-list"></div>
+      </div>
+    </div>
+    <div class="section-title"><span>📋 识别历史</span></div>
+    <div id="ai-history"></div>
+  </div>
+
+  <!-- ==================== 种植日记 ==================== -->
+  <div id="page-diary" class="page">
+    <div class="topbar">
+      <h1>📔 种植日记</h1>
+      <div class="topbar-actions"><div class="icon-btn" onclick="navigateTo('home')">🏠</div></div>
+    </div>
+    <div style="padding:12px 16px;">
+      <select class="input-field" id="diary-plot-select" onchange="onDiaryPlotChange()"><option value="">-- 选择地块 --</option></select>
+    </div>
+    <div id="diary-list"></div>
+    <div id="diary-write-area" style="display:none;">
+      <div class="diary-input-area">
+        <div style="font-size:14px;font-weight:700;margin-bottom:10px;">✏️ 写一篇新日记</div>
+        <textarea id="diary-content" placeholder="记录今天的种植心得、作物变化、孩子的小故事..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="ai-draft-btn" onclick="generateAIDraft()">✨ AI帮我写</button>
+          <button class="btn btn-primary btn-sm" onclick="submitDiary()">发布</button>
+        </div>
+      </div>
+    </div>
+    <div class="section-title"><span>🏆 成长证书</span></div>
+    <div id="cert-preview" style="padding:0 16px;"></div>
+  </div>
+
+  <!-- ==================== 知识课堂 ==================== -->
+  <div id="page-lessons" class="page">
+    <div class="topbar">
+      <h1>📚 知识课堂</h1>
+      <div class="topbar-actions"><div class="icon-btn" onclick="navigateTo('home')">🏠</div></div>
+    </div>
+    <div class="lesson-category-tabs" id="lesson-tabs">
+      <div class="lesson-cat-tab active" data-crop="all">全部</div>
+      <div class="lesson-cat-tab" data-crop="小番茄">🍅 番茄</div>
+      <div class="lesson-cat-tab" data-crop="草莓">🍓 草莓</div>
+      <div class="lesson-cat-tab" data-crop="向日葵">🌻 向日葵</div>
+    </div>
+    <div id="lesson-list"></div>
+  </div>
+
+  <!-- ==================== 社区 ==================== -->
+  <div id="page-community" class="page">
+    <div class="topbar">
+      <h1>💬 农场社区</h1>
+      <div class="topbar-actions"><div class="icon-btn" onclick="navigateTo('home')">🏠</div></div>
+    </div>
+    <div style="padding:12px 16px;">
+      <div class="card" style="display:flex;gap:10px;align-items:center;cursor:pointer;" onclick="showToast('发帖功能开发中')">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--green-100);display:flex;align-items:center;justify-content:center;font-size:20px;">🌾</div>
+        <div style="flex:1;font-size:14px;color:var(--gray-500);">分享你的农场日常...</div>
+        <span style="font-size:20px;">📷</span>
+      </div>
+    </div>
+    <div id="community-posts"></div>
+  </div>
+
+  <!-- ==================== 活动 ==================== -->
+  <div id="page-activities" class="page">
+    <div class="topbar">
+      <h1>🎉 农场活动</h1>
+      <div class="topbar-actions"><div class="icon-btn" onclick="navigateTo('home')">🏠</div></div>
+    </div>
+    <div id="activity-list"></div>
+  </div>
+
+  <!-- ==================== 我的 ==================== -->
+  <div id="page-profile" class="page">
+    <div id="profile-guest" style="display:none;padding:40px 24px;text-align:center;">
+      <div style="font-size:72px;margin-bottom:16px;opacity:0.6;">🌾</div>
+      <div style="font-size:18px;font-weight:800;color:var(--gray-900);margin-bottom:8px;">欢迎来到城市AI农场</div>
+      <div style="font-size:13px;color:var(--gray-500);margin-bottom:28px;">登录后可以认养地块、写日记、参与社区互动</div>
+      <button class="btn btn-primary btn-lg" style="width:100%;padding:14px;" onclick="showAuthPage()">🔐 登录 / 注册</button>
+      <button class="btn btn-outline" style="width:100%;margin-top:10px;padding:12px;" onclick="showToast('管理员账号由超级管理员在后台授权创建')">👨‍🌾 农场管理员入口（超级管理员授权）</button>
+    </div>
+    <div id="profile-user" style="display:none;">
+      <div class="profile-header">
+        <div class="profile-avatar" id="profile-avatar">🌾</div>
+        <div class="profile-info">
+          <h2 id="profile-nickname">农场小达人</h2>
+          <p id="profile-phone">138****8888</p>
+        </div>
+      </div>
+      <div class="section-title"><span>👨‍👩‍👧‍👦 家庭成员</span></div>
+      <div id="family-list" style="padding:0 16px;"></div>
+      <div class="menu-list">
+        <div class="menu-item" onclick="navigateTo('bookings')"><span class="menu-icon">📅</span><span>我的预约</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="navigateTo('diary')"><span class="menu-icon">📔</span><span>种植日记</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="navigateTo('community')"><span class="menu-icon">💬</span><span>社区消息</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="showToast('暂无可领取的福袋')"><span class="menu-icon">🎁</span><span>我的福袋</span><span class="menu-arrow">›</span></div>
+      </div>
+      <div class="menu-list">
+        <div class="menu-item" onclick="showToast('通知设置面板')"><span class="menu-icon">🔔</span><span>消息通知</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="showToast('客服电话：400-xxx-xxxx')"><span class="menu-icon">📞</span><span>联系客服</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="showToast('版本 v1.2.0 多租户SaaS版')"><span class="menu-icon">ℹ️</span><span>关于我们</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item" onclick="handleUserLogout()" id="menu-logout" style="display:none;color:#dc2626;"><span class="menu-icon">🚪</span><span>退出登录</span><span class="menu-arrow">›</span></div>
+      </div>
+    </div>
+    <div style="text-align:center;padding:16px 0 8px;">
+      <span id="version-trigger" style="font-size:11px;color:var(--gray-400);cursor:default;user-select:none;">v1.2.0 · 多租户SaaS版</span>
+    </div>
+  </div>
+
+  <!-- ==================== 认养详情弹窗 ==================== -->
+  <div class="modal-overlay" id="modal-plot">
+    <div class="modal-sheet" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div class="modal-close" onclick="closeModal('modal-plot')">✕</div>
+      <div class="modal-title" id="modal-plot-title">地块详情</div>
+      <div id="modal-plot-body"></div>
+    </div>
+  </div>
+
+  <!-- ==================== 活动报名弹窗 ==================== -->
+  <div class="modal-overlay" id="modal-activity">
+    <div class="modal-sheet" style="position:relative;">
+      <div class="modal-handle"></div>
+      <div class="modal-close" onclick="closeModal('modal-activity')">✕</div>
+      <div class="modal-title" id="modal-activity-title">活动报名</div>
+      <div id="modal-activity-body"></div>
+    </div>
+  </div>
+
+  <!-- ==================== 吐司提示 ==================== -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ==================== 底部Tab栏 ==================== -->
+  <nav class="tabbar" id="tabbar">
+    <div class="tab-item active" data-page="home" onclick="navigateTo('home')"><span class="tab-icon">🏠</span><span>首页</span></div>
+    <div class="tab-item" data-page="plots" onclick="navigateTo('plots')"><span class="tab-icon">🌾</span><span>认养</span></div>
+    <div class="tab-item" data-page="map" onclick="navigateTo('map')"><span class="tab-icon">🗺️</span><span>地图</span></div>
+    <div class="tab-item" data-page="community" onclick="navigateTo('community')"><span class="tab-icon">💬</span><span>社区</span></div>
+    <div class="tab-item" data-page="profile" onclick="navigateTo('profile')"><span class="tab-icon">👤</span><span>我的</span></div>
+  </nav>
+</div><!-- #app -->
+
+<!-- ============================================================
+     用户端 - 登录 / 注册页
+     ============================================================ -->
+<div id="page-auth" class="page" style="position:fixed;inset:0;z-index:9999;background:var(--gray-50);">
+  <div style="min-height:100vh;display:flex;flex-direction:column;">
+    <div style="background:linear-gradient(135deg,#16a34a,#22c55e,#86efac);padding:40px 24px 32px;border-radius:0 0 var(--radius-xl) var(--radius-xl);position:relative;overflow:hidden;">
+      <button onclick="hideAuthPage()" style="position:absolute;top:16px;left:16px;width:36px;height:36px;border-radius:var(--radius-full);background:rgba(255,255,255,0.2);color:white;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);border:none;">‹</button>
+      <div style="position:absolute;bottom:-8px;right:16px;font-size:56px;opacity:0.2;letter-spacing:6px;">🌻🌽🍅🥕🌿</div>
+      <div style="font-size:48px;margin-bottom:8px;">🌾</div>
+      <div style="font-size:22px;font-weight:800;color:var(--white);">城市AI农场</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-top:4px;">认养一块地，收获一整年的快乐</div>
+    </div>
+    <div style="display:flex;gap:0;margin:20px 24px 0;background:var(--gray-200);border-radius:var(--radius-full);padding:4px;">
+      <button id="auth-tab-login" onclick="switchAuthTab('login')" style="flex:1;padding:10px;border-radius:var(--radius-full);font-size:14px;font-weight:700;background:var(--white);color:var(--gray-900);box-shadow:var(--shadow-sm);transition:all 0.2s;">登录</button>
+      <button id="auth-tab-register" onclick="switchAuthTab('register')" style="flex:1;padding:10px;border-radius:var(--radius-full);font-size:14px;font-weight:600;color:var(--gray-500);transition:all 0.2s;">注册</button>
+    </div>
+    <div id="auth-form-login" style="padding:24px;flex:1;">
+      <div class="input-group"><label>手机号</label><input type="tel" id="login-phone" class="input-field" placeholder="请输入手机号" maxlength="11" autocomplete="off"></div>
+      <div class="input-group">
+        <label>验证码</label>
+        <div style="display:flex;gap:10px;">
+          <input type="text" id="login-code" class="input-field" placeholder="请输入验证码" maxlength="6" style="flex:1;">
+          <button id="login-send-code" onclick="sendVerifyCode('login')" style="padding:0 14px;border-radius:var(--radius-sm);border:2px solid var(--green-400);color:var(--green-600);font-size:13px;font-weight:600;white-space:nowrap;background:var(--white);">获取验证码</button>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full btn-lg mt-16" onclick="handleUserLogin()" style="padding:14px;font-size:16px;">登 录</button>
+      <p style="font-size:11px;color:var(--gray-400);text-align:center;margin-top:14px;line-height:1.6;">登录即同意《用户协议》和《隐私政策》<br>普通用户账号可自由注册 · 管理员账号由超级管理员授权创建</p>
+    </div>
+    <div id="auth-form-register" style="padding:24px;flex:1;display:none;">
+      <div class="input-group"><label>昵称</label><input type="text" id="reg-nickname" class="input-field" placeholder="怎么称呼你" autocomplete="off"></div>
+      <div class="input-group"><label>手机号</label><input type="tel" id="reg-phone" class="input-field" placeholder="请输入手机号" maxlength="11" autocomplete="off"></div>
+      <div class="input-group">
+        <label>验证码</label>
+        <div style="display:flex;gap:10px;">
+          <input type="text" id="reg-code" class="input-field" placeholder="请输入验证码" maxlength="6" style="flex:1;">
+          <button id="reg-send-code" onclick="sendVerifyCode('register')" style="padding:0 14px;border-radius:var(--radius-sm);border:2px solid var(--green-400);color:var(--green-600);font-size:13px;font-weight:600;white-space:nowrap;background:var(--white);">获取验证码</button>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full btn-lg mt-16" onclick="handleUserRegister()" style="padding:14px;font-size:16px;">注 册</button>
+      <p style="font-size:11px;color:var(--gray-400);text-align:center;margin-top:14px;line-height:1.6;">注册后即可认养地块、写日记、参与社区<br>管理员账号由超级管理员在后台授权创建</p>
+    </div>
+    <div style="padding:16px 24px 32px;text-align:center;">
+      <button onclick="hideAuthPage()" style="font-size:13px;color:var(--gray-500);font-weight:500;background:none;border:none;cursor:pointer;">← 返回首页</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     管理端 - 登录页
+     ============================================================ -->
+<div id="page-admin-login" class="page" style="position:fixed;inset:0;z-index:9999;background:var(--gray-50);">
+  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-size:48px;margin-bottom:8px;">🌾</div>
+      <div style="font-size:20px;font-weight:800;color:var(--gray-900);">城市AI农场</div>
+      <div style="font-size:13px;color:var(--gray-500);margin-top:4px;">管理后台登录</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:24px;background:var(--gray-200);border-radius:var(--radius-full);padding:4px;">
+      <button id="tab-sa" onclick="switchLoginTab('super_admin')" style="padding:8px 20px;border-radius:var(--radius-full);font-size:13px;font-weight:600;background:var(--white);color:var(--gray-900);box-shadow:var(--shadow-sm);">超级管理员</button>
+      <button id="tab-fa" onclick="switchLoginTab('farm_admin')" style="padding:8px 20px;border-radius:var(--radius-full);font-size:13px;font-weight:600;color:var(--gray-500);">农场管理员</button>
+    </div>
+    <form id="form-super-admin" onsubmit="handleSuperAdminLogin(event)" style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:14px;">
+      <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;color:var(--gray-700);">账号</label><input id="sa-username" type="text" placeholder="超级管理员账号" autocomplete="off" style="width:100%;padding:12px 16px;border:1.5px solid var(--gray-200);border-radius:var(--radius-md);font-size:14px;outline:none;" onfocus="this.style.borderColor='var(--green-400)'" onblur="this.style.borderColor='var(--gray-200)'"></div>
+      <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;color:var(--gray-700);">密码</label><input id="sa-password" type="password" placeholder="超级管理员密码" style="width:100%;padding:12px 16px;border:1.5px solid var(--gray-200);border-radius:var(--radius-md);font-size:14px;outline:none;" onfocus="this.style.borderColor='var(--green-400)'" onblur="this.style.borderColor='var(--gray-200)'"></div>
+      <button type="submit" style="width:100%;padding:14px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--green-500),var(--green-600));color:white;font-size:15px;font-weight:700;box-shadow:0 4px 12px rgba(34,197,94,0.3);margin-top:8px;">登 录</button>
+      <button type="button" onclick="hideAdminLogin()" style="width:100%;padding:12px;border-radius:var(--radius-md);background:var(--gray-100);color:var(--gray-700);font-size:13px;font-weight:600;">返回用户端</button>
+    </form>
+    <form id="form-farm-admin" onsubmit="handleFarmAdminLogin(event)" style="width:100%;max-width:340px;display:none;flex-direction:column;gap:14px;">
+      <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;color:var(--gray-700);">选择农场</label>
+        <select id="fa-farm-select" style="width:100%;padding:12px 16px;border:1.5px solid var(--gray-200);border-radius:var(--radius-md);font-size:14px;outline:none;background:white;">
+          <option value="">-- 选择农场 --</option>
+          <option value="farm_demo">阳光开心农场</option>
+        </select>
+      </div>
+      <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;color:var(--gray-700);">账号</label><input id="fa-username" type="text" placeholder="管理员账号" autocomplete="off" style="width:100%;padding:12px 16px;border:1.5px solid var(--gray-200);border-radius:var(--radius-md);font-size:14px;outline:none;" onfocus="this.style.borderColor='var(--green-400)'" onblur="this.style.borderColor='var(--gray-200)'"></div>
+      <div><label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;color:var(--gray-700);">密码</label><input id="fa-password" type="password" placeholder="管理员密码" style="width:100%;padding:12px 16px;border:1.5px solid var(--gray-200);border-radius:var(--radius-md);font-size:14px;outline:none;" onfocus="this.style.borderColor='var(--green-400)'" onblur="this.style.borderColor='var(--gray-200)'"></div>
+      <button type="submit" style="width:100%;padding:14px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--green-500),var(--green-600));color:white;font-size:15px;font-weight:700;box-shadow:0 4px 12px rgba(34,197,94,0.3);margin-top:8px;">登 录</button>
+      <button type="button" onclick="hideAdminLogin()" style="width:100%;padding:12px;border-radius:var(--radius-md);background:var(--gray-100);color:var(--gray-700);font-size:13px;font-weight:600;">返回用户端</button>
+    </form>
+    <div style="margin-top:24px;font-size:11px;color:var(--gray-400);text-align:center;">超级管理员：superadmin / admin123<br>演示农场管理员：farm_demo_admin / demo123</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     超级管理端页面
+     ============================================================ -->
+<div id="page-super-admin" class="page" style="position:fixed;inset:0;z-index:9998;background:var(--gray-50);overflow-y:auto;">
+  <div id="sa-content"></div>
+</div>
+
+<!-- ============================================================
+     农场管理端页面
+     ============================================================ -->
+<div id="page-farm-admin" class="page" style="position:fixed;inset:0;z-index:9997;background:var(--gray-50);overflow-y:auto;">
+  <div id="fa-content"></div>
+</div>
+
+<style>
+/* 管理端样式 */
+.admin-header { position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);padding:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--gray-100); }
+.admin-menu-btn { width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--white);border-radius:var(--radius-md);box-shadow:var(--shadow-card);cursor:pointer;text-align:left;transition:transform 0.15s,box-shadow 0.15s; }
+.admin-menu-btn:active { transform:scale(0.98); }
+.admin-menu-icon { font-size:24px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--green-50);border-radius:var(--radius-sm);flex-shrink:0; }
+.admin-grid-btn { position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 12px;background:var(--white);border-radius:var(--radius-md);box-shadow:var(--shadow-card);cursor:pointer;transition:transform 0.15s; }
+.admin-grid-btn:active { transform:scale(0.95); }
+.admin-grid-icon { font-size:28px; }
+.tag { display:inline-block;padding:2px 10px;border-radius:var(--radius-full);font-size:11px;font-weight:600; }
+.tag-green { background:#dcfce7;color:#15803d; }
+.tag-blue  { background:#dbeafe;color:#1d4ed8; }
+.tag-orange{ background:#ffedd5;color:#c2410c; }
+.tag-red   { background:#fee2e2;color:#b91c1c; }
+.tag-gray  { background:var(--gray-100);color:var(--gray-500); }
+</style>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

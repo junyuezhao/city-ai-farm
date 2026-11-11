@@ -1,0 +1,26 @@
+{
+  "appId": "com.cityaifarm.app",
+  "appName": "城市AI农场",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "bundledWebRuntime": false,
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#16a34a",
+      "androidSplashResourceName": "splash",
+      "iosSpashScreenResourceName": "splash",
+      "showSpashScreen": true,
+      "splashFullScreen": true,
+      "layoutName": "splash"
+    },
+    "StatusBar": {
+      "style": "light-content",
+      "backgroundColor": "#16a34a"
+    }
+  },
+  "cordova": {}
+}

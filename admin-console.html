@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- PWA Core (管理端) -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16a34a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AI农场管理">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-48x48.png">
+<link rel="shortcut icon" href="assets/icons/favicon.ico">
+
+<title>城市AI农场 · 管理控制台</title>
+<style>
+/* ============================================================
+   全局变量 & 重置
+   ============================================================ */
+:root {
+  --sidebar-w: 240px;
+  --header-h: 56px;
+  --green-50:  #f0fdf4;  --green-100: #dcfce7;  --green-200: #bbf7d0;
+  --green-300: #86efac;  --green-400: #4ade80;  --green-500: #22c55e;
+  --green-600: #16a34a;  --green-700: #15803d;  --green-800: #166534;
+  --green-900: #14532d;
+  --gray-50:   #f9fafb;  --gray-100: #f3f4f6;  --gray-200: #e5e7eb;
+  --gray-300:  #d1d5db;  --gray-400: #9ca3af;  --gray-500: #6b7280;
+  --gray-600:  #4b5563;  --gray-700: #374151;  --gray-800: #1f2937;
+  --gray-900:  #111827;
+  --white:     #ffffff;
+  --red-50:    #fef2f2;  --red-500: #ef4444;   --red-600: #dc2626;
+  --amber-50:  #fffbeb;  --amber-500: #f59e0b;  --amber-600: #d97706;
+  --blue-50:   #eff6ff;  --blue-500: #3b82f6;  --blue-600: #2563eb;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+  --shadow:     0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:  0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+  --shadow-lg:  0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1);
+  --radius-sm: 6px;  --radius: 8px;  --radius-md: 10px;  --radius-lg: 14px;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+  --transition: all .2s ease;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: var(--font-sans); background: var(--gray-100); color: var(--gray-800); font-size: 14px; line-height: 1.5; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+input, select, textarea { font-family: inherit; font-size: 14px; }
+a { color: var(--green-600); text-decoration: none; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+/* ============================================================
+   登录页
+   ============================================================ */
+#login-page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--green-900) 0%, var(--green-700) 50%, var(--green-500) 100%);
+  position: relative; overflow: hidden;
+}
+#login-page::before {
+  content: ''; position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.login-card {
+  position: relative; z-index: 1;
+  background: rgba(255,255,255,.97);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 420px; max-width: 94vw;
+  padding: 40px 36px;
+  backdrop-filter: blur(20px);
+}
+.login-logo { text-align: center; margin-bottom: 28px; }
+.login-logo .emoji { font-size: 48px; display: block; margin-bottom: 8px; }
+.login-logo h1 { font-size: 22px; font-weight: 800; color: var(--green-800); }
+.login-logo p { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
+.login-tabs { display: flex; gap: 4px; background: var(--gray-100); border-radius: var(--radius-full); padding: 4px; margin-bottom: 24px; }
+.login-tab { flex: 1; padding: 10px; border-radius: var(--radius-full); font-size: 14px; font-weight: 600; transition: var(--transition); color: var(--gray-500); text-align: center; }
+.login-tab.active { background: var(--white); color: var(--green-700); box-shadow: var(--shadow-sm); }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 6px; }
+.form-input {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid var(--gray-200); border-radius: var(--radius);
+  font-size: 14px; color: var(--gray-800);
+  transition: var(--transition); outline: none;
+  background: var(--white);
+}
+.form-input:focus { border-color: var(--green-400); box-shadow: 0 0 0 3px rgba(34,197,94,.12); }
+.form-input::placeholder { color: var(--gray-400); }
+.form-select {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid var(--gray-200); border-radius: var(--radius);
+  font-size: 14px; color: var(--gray-800);
+  background: var(--white); outline: none; cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; border-radius: var(--radius); transition: var(--transition); white-space: nowrap; }
+.btn-primary { background: linear-gradient(135deg, var(--green-500), var(--green-600)); color: white; padding: 11px 20px; box-shadow: 0 2px 8px rgba(34,197,94,.3); }
+.btn-primary:hover { box-shadow: 0 4px 12px rgba(34,197,94,.4); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary { background: var(--gray-100); color: var(--gray-700); padding: 9px 16px; }
+.btn-secondary:hover { background: var(--gray-200); }
+.btn-outline { border: 1.5px solid var(--gray-200); color: var(--gray-600); padding: 9px 16px; }
+.btn-outline:hover { border-color: var(--gray-300); background: var(--gray-50); }
+.btn-danger { background: var(--red-500); color: white; padding: 9px 16px; }
+.btn-danger:hover { background: var(--red-600); }
+.btn-sm { padding: 6px 12px; font-size: 13px; border-radius: var(--radius-sm); }
+.btn-lg { padding: 13px 24px; font-size: 15px; }
+.btn-full { width: 100%; }
+.login-hint { text-align: center; font-size: 11px; color: var(--gray-400); margin-top: 16px; line-height: 1.8; }
+
+/* ============================================================
+   主布局
+   ============================================================ */
+#app-layout { display: flex; height: 100vh; overflow: hidden; }
+
+/* 侧边栏 */
+#sidebar {
+  width: var(--sidebar-w); min-height: 100vh;
+  background: linear-gradient(180deg, var(--green-900) 0%, var(--green-800) 100%);
+  display: flex; flex-direction: column;
+  flex-shrink: 0;
+  box-shadow: 2px 0 12px rgba(0,0,0,.15);
+}
+.sidebar-header {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.sidebar-logo { display: flex; align-items: center; gap: 10px; }
+.sidebar-logo .emoji { font-size: 28px; }
+.sidebar-logo .title { font-size: 16px; font-weight: 800; color: white; line-height: 1.2; }
+.sidebar-logo .subtitle { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 2px; }
+.sidebar-role-switch {
+  margin: 12px 14px 0;
+  background: rgba(255,255,255,.08);
+  border-radius: var(--radius); padding: 8px 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.role-badge {
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: var(--radius-full); text-transform: uppercase; letter-spacing: .5px;
+}
+.role-badge.super { background: rgba(251,191,36,.2); color: #fbbf24; }
+.role-badge.farm { background: rgba(96,165,250,.2); color: #60a5fa; }
+.role-switch-btn { margin-left: auto; font-size: 11px; color: rgba(255,255,255,.5); cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+.role-switch-btn:hover { color: white; background: rgba(255,255,255,.1); }
+
+.sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
+.nav-section { margin-bottom: 6px; }
+.nav-section-title {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  color: rgba(255,255,255,.35); padding: 10px 12px 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius);
+  color: rgba(255,255,255,.65); font-size: 13.5px; font-weight: 500;
+  cursor: pointer; transition: var(--transition); margin-bottom: 2px;
+  position: relative;
+}
+.nav-item:hover { background: rgba(255,255,255,.08); color: rgba(255,255,255,.9); }
+.nav-item.active { background: rgba(255,255,255,.15); color: white; font-weight: 600; }
+.nav-item.active::before {
+  content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 60%; background: var(--green-400); border-radius: 0 2px 2px 0;
+}
+.nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto; background: var(--red-500); color: white;
+  font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px;
+  min-width: 18px; text-align: center;
+}
+.sidebar-footer { padding: 12px 14px; border-top: 1px solid rgba(255,255,255,.1); }
+.sidebar-user { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.sidebar-avatar { width: 32px; height: 32px; border-radius: var(--radius); background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.sidebar-user-info { flex: 1; min-width: 0; }
+.sidebar-user-name { font-size: 13px; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-user-role { font-size: 11px; color: rgba(255,255,255,.45); }
+.btn-logout { width: 100%; padding: 8px; background: rgba(255,255,255,.06); color: rgba(255,255,255,.6); border-radius: var(--radius); font-size: 12px; font-weight: 600; transition: var(--transition); }
+.btn-logout:hover { background: rgba(255,255,255,.12); color: white; }
+
+/* 主内容区 */
+#main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.topbar {
+  height: var(--header-h); background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  display: flex; align-items: center; padding: 0 24px; gap: 16px;
+  flex-shrink: 0;
+}
+.topbar-title { font-size: 18px; font-weight: 800; color: var(--gray-900); flex: 1; }
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+.topbar-btn {
+  padding: 7px 14px; border-radius: var(--radius);
+  font-size: 13px; font-weight: 600;
+  background: var(--gray-100); color: var(--gray-700);
+  transition: var(--transition);
+}
+.topbar-btn:hover { background: var(--gray-200); }
+.content-area { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* ============================================================
+   页面模块
+   ============================================================ */
+.page-module { display: none; }
+.page-module.active { display: block; }
+
+/* 卡片 */
+.card {
+  background: var(--white); border-radius: var(--radius-md);
+  box-shadow: var(--shadow); border: 1px solid var(--gray-100);
+  padding: 20px;
+}
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.card-title { font-size: 15px; font-weight: 700; color: var(--gray-900); }
+.card-subtitle { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+
+/* 统计卡片区 */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--white); border-radius: var(--radius-md);
+  box-shadow: var(--shadow); border: 1px solid var(--gray-100);
+  padding: 20px; display: flex; align-items: flex-start; gap: 14px;
+  transition: var(--transition);
+}
+.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.stat-icon { width: 44px; height: 44px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.stat-icon.green { background: var(--green-50); }
+.stat-icon.blue { background: var(--blue-50); }
+.stat-icon.amber { background: var(--amber-50); }
+.stat-icon.red { background: var(--red-50); }
+.stat-value { font-size: 24px; font-weight: 800; color: var(--gray-900); line-height: 1.1; }
+.stat-label { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+.stat-change { font-size: 11px; font-weight: 600; margin-top: 4px; }
+.stat-change.up { color: var(--green-600); }
+.stat-change.down { color: var(--red-500); }
+
+/* 表格 */
+.table-container { overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--gray-100); background: var(--white); box-shadow: var(--shadow); }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  background: var(--gray-50); padding: 10px 16px;
+  font-size: 12px; font-weight: 700; color: var(--gray-500);
+  text-transform: uppercase; letter-spacing: .5px;
+  border-bottom: 1px solid var(--gray-200);
+  text-align: left; white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid var(--gray-100); transition: var(--transition); }
+tbody tr:hover { background: var(--gray-50); }
+tbody td { padding: 12px 16px; font-size: 13px; color: var(--gray-700); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: none; }
+
+/* 标签 */
+.tag { display: inline-block; padding: 2px 10px; border-radius: var(--radius-full); font-size: 11px; font-weight: 600; }
+.tag-green { background: var(--green-100); color: var(--green-700); }
+.tag-blue { background: var(--blue-50); color: var(--blue-600); }
+.tag-amber { background: var(--amber-50); color: var(--amber-600); }
+.tag-red { background: var(--red-50); color: var(--red-600); }
+.tag-gray { background: var(--gray-100); color: var(--gray-500); }
+
+/* 操作按钮组 */
+.action-group { display: flex; gap: 6px; }
+.action-btn {
+  width: 30px; height: 30px; border-radius: var(--radius-sm);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px; transition: var(--transition); cursor: pointer;
+  background: var(--gray-100); color: var(--gray-600);
+}
+.action-btn:hover { background: var(--gray-200); color: var(--gray-800); }
+.action-btn.edit:hover { background: var(--blue-50); color: var(--blue-600); }
+.action-btn.delete:hover { background: var(--red-50); color: var(--red-600); }
+
+/* 工具栏 */
+.toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.search-box {
+  flex: 1; min-width: 200px; position: relative;
+}
+.search-box input {
+  width: 100%; padding: 8px 14px 8px 36px;
+  border: 1.5px solid var(--gray-200); border-radius: var(--radius);
+  font-size: 13px; outline: none; transition: var(--transition);
+  background: var(--white);
+}
+.search-box input:focus { border-color: var(--green-400); box-shadow: 0 0 0 3px rgba(34,197,94,.1); }
+.search-box .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--gray-400); }
+.filter-select { padding: 8px 32px 8px 12px; border: 1.5px solid var(--gray-200); border-radius: var(--radius); font-size: 13px; outline: none; background: var(--white); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+
+/* 图表区 */
+.chart-container { position: relative; }
+.chart-container canvas { width: 100% !important; }
+
+/* 两栏布局 */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.three-col { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+
+/* 空状态 */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--gray-400); }
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+
+/* 弹窗 */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,.45); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden; transition: var(--transition);
+}
+.modal-overlay.open { opacity: 1; visibility: visible; }
+.modal-box {
+  background: var(--white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg); width: 520px; max-width: 94vw; max-height: 85vh;
+  display: flex; flex-direction: column;
+  transform: scale(.95) translateY(10px); transition: var(--transition);
+}
+.modal-overlay.open .modal-box { transform: scale(1) translateY(0); }
+.modal-header { padding: 20px 24px 0; display: flex; align-items: center; justify-content: space-between; }
+.modal-header h3 { font-size: 17px; font-weight: 800; color: var(--gray-900); }
+.modal-close { width: 32px; height: 32px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--gray-400); cursor: pointer; transition: var(--transition); }
+.modal-close:hover { background: var(--gray-100); color: var(--gray-600); }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 0 24px 20px; display: flex; gap: 10px; justify-content: flex-end; }
+
+/* 分页 */
+.pagination { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+.page-info { font-size: 12px; color: var(--gray-500); }
+.page-btns { display: flex; gap: 4px; }
+.page-btn { width: 32px; height: 32px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer; transition: var(--transition); color: var(--gray-600); }
+.page-btn:hover { background: var(--gray-100); }
+.page-btn.active { background: var(--green-500); color: white; }
+
+/* 提示 Toast */
+.toast {
+  position: fixed; top: 24px; right: 24px; z-index: 2000;
+  background: var(--gray-900); color: white;
+  padding: 12px 20px; border-radius: var(--radius);
+  box-shadow: var(--shadow-lg); font-size: 13px; font-weight: 500;
+  transform: translateX(120%); transition: transform .3s ease;
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.show { transform: translateX(0); }
+.toast.success { background: var(--green-600); }
+.toast.error { background: var(--red-500); }
+
+/* 响应式 */
+@media (max-width: 1200px) {
+  .two-col, .three-col { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  #sidebar { width: 60px; }
+  .sidebar-header .title, .sidebar-header .subtitle, .nav-section-title,
+  .nav-item span:not(.nav-icon), .sidebar-footer { display: none; }
+  .sidebar-logo { justify-content: center; }
+  .nav-item { justify-content: center; padding: 12px; }
+  .nav-badge { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     登录页
+     ============================================================ -->
+<div id="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="emoji">🌾</span>
+      <h1>城市AI农场</h1>
+      <p>管理控制台</p>
+    </div>
+    <div class="login-tabs">
+      <div class="login-tab active" onclick="switchLoginRole('super')">超级管理员</div>
+      <div class="login-tab" onclick="switchLoginRole('farm')">农场管理员</div>
+    </div>
+
+    <!-- 超级管理员登录 -->
+    <div id="form-super">
+      <div class="form-group">
+        <label>账号</label>
+        <input type="text" id="sa-user" class="form-input" placeholder="超级管理员账号" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" id="sa-pass" class="form-input" placeholder="超级管理员密码" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" onclick="doLogin()">登 录</button>
+      <div class="login-hint">测试账号：superadmin / admin123</div>
+    </div>
+
+    <!-- 农场管理员登录 -->
+    <div id="form-farm" style="display:none;">
+      <div class="form-group">
+        <label>选择农场</label>
+        <select id="fa-farm" class="form-select">
+          <option value="">-- 选择农场 --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>账号</label>
+        <input type="text" id="fa-user" class="form-input" placeholder="管理员账号" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" id="fa-pass" class="form-input" placeholder="管理员密码" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" onclick="doLogin()">登 录</button>
+      <div class="login-hint">测试账号：farm_demo_admin / demo123<br>农场管理员账号由超级管理员授权创建</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     主应用布局
+     ============================================================ -->
+<div id="app-layout" style="display:none;">
+
+  <!-- 侧边栏 -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <span class="emoji">🌾</span>
+        <div>
+          <div class="title">城市AI农场</div>
+          <div class="subtitle">管理控制台 v2.0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-role-switch">
+      <span id="current-role-badge" class="role-badge super">超级管理员</span>
+      <span class="role-switch-btn" onclick="showRoleSwitch()" title="切换角色">🔄</span>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebar-nav">
+      <!-- 由JS动态生成 -->
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sa-avatar">👑</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sa-name">超级管理员</div>
+          <div class="sidebar-user-role" id="sa-role-text">Super Admin</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">🚪 退出登录</button>
+    </div>
+  </aside>
+
+  <!-- 主内容区 -->
+  <main id="main-content">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">数据看板</div>
+      <div class="topbar-actions">
+        <button class="topbar-btn" onclick="refreshData()">🔄 刷新</button>
+        <button class="topbar-btn" onclick="showToast('通知中心暂未开放')">🔔 通知</button>
+      </div>
+    </div>
+    <div class="content-area" id="content-area">
+
+      <!-- ========== 1. 数据看板 ========== -->
+      <div id="page-dashboard" class="page-module active"></div>
+
+      <!-- ========== 2. 地块管理 ========== -->
+      <div id="page-plots" class="page-module"></div>
+
+      <!-- ========== 3. 预约审核 ========== -->
+      <div id="page-bookings" class="page-module"></div>
+
+      <!-- ========== 4. AI识别管理 ========== -->
+      <div id="page-ai" class="page-module"></div>
+
+      <!-- ========== 5. 活动管理 ========== -->
+      <div id="page-activities" class="page-module"></div>
+
+      <!-- ========== 6. 消息推送 ========== -->
+      <div id="page-messages" class="page-module"></div>
+
+      <!-- ========== 7. 用户管理 ========== -->
+      <div id="page-users" class="page-module"></div>
+
+      <!-- ========== 8. 财务结算 ========== -->
+      <div id="page-finance" class="page-module"></div>
+
+      <!-- ========== 9. 系统日志 ========== -->
+      <div id="page-logs" class="page-module"></div>
+
+      <!-- ========== 10. 农场管理（仅超管） ========== -->
+      <div id="page-farms" class="page-module"></div>
+
+      <!-- ========== 11. 租户管理（仅超管） ========== -->
+      <div id="page-tenants" class="page-module"></div>
+
+      <!-- ========== 12. 系统设置（仅超管） ========== -->
+      <div id="page-settings" class="page-module"></div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ============================================================
+     弹窗：地块编辑
+     ============================================================ -->
+<div class="modal-overlay" id="modal-plot-edit">
+  <div class="modal-box" style="width:560px;">
+    <div class="modal-header">
+      <h3 id="modal-plot-edit-title">编辑地块</h3>
+      <div class="modal-close" onclick="closeModal('modal-plot-edit')">✕</div>
+    </div>
+    <div class="modal-body" id="modal-plot-edit-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-plot-edit')">取消</button>
+      <button class="btn btn-primary" onclick="savePlotEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     弹窗：审核预约
+     ============================================================ -->
+<div class="modal-overlay" id="modal-booking-review">
+  <div class="modal-box" style="width:480px;">
+    <div class="modal-header">
+      <h3>预约审核</h3>
+      <div class="modal-close" onclick="closeModal('modal-booking-review')">✕</div>
+    </div>
+    <div class="modal-body" id="modal-booking-review-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="reviewBooking('rejected')">❌ 拒绝</button>
+      <button class="btn btn-primary" onclick="reviewBooking('approved')">✅ 通过</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     弹窗：发送消息
+     ============================================================ -->
+<div class="modal-overlay" id="modal-send-msg">
+  <div class="modal-box" style="width:520px;">
+    <div class="modal-header">
+      <h3>发送消息 / 系统通知</h3>
+      <div class="modal-close" onclick="closeModal('modal-send-msg')">✕</div>
+    </div>
+    <div class="modal-body" id="modal-send-msg-body">
+      <div class="form-group">
+        <label>接收对象</label>
+        <select class="form-select" id="msg-target">
+          <option value="all">全部用户</option>
+          <option value="farm">本农场用户</option>
+          <option value="plot_owners">地块认养人</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>消息类型</label>
+        <select class="form-select" id="msg-type">
+          <option value="system">系统通知</option>
+          <option value="activity">活动通知</option>
+          <option value="harvest">丰收提醒</option>
+          <option value="weather">天气提醒</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>标题</label>
+        <input type="text" class="form-input" id="msg-title" placeholder="消息标题">
+      </div>
+      <div class="form-group">
+        <label>内容</label>
+        <textarea class="form-input" id="msg-content" rows="4" placeholder="请输入消息内容..." style="resize:vertical;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-send-msg')">取消</button>
+      <button class="btn btn-primary" onclick="sendMessage()">📤 发送</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     JS 逻辑
+     ============================================================ -->
+<script src="js/data.js"></script>
+<script>
+/* ============================================================
+   全局状态
+   ============================================================ */
+let currentRole   = null; // 'super_admin' | 'farm_admin'
+let currentAdmin  = null;
+let currentFarmId = null;
+let currentPage   = 'dashboard';
+let editingPlotId = null;
+let reviewingBookingId = null;
+
+/* ============================================================
+   初始化
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  // 检查是否有持久化登录态
+  const savedRole = localStorage.getItem('admin_role');
+  const savedAdmin = localStorage.getItem('admin_info');
+  if (savedRole && savedAdmin) {
+    currentRole = savedRole;
+    currentAdmin = JSON.parse(savedAdmin);
+    if (currentRole === 'farm_admin') {
+      currentFarmId = currentAdmin.farmId;
+    }
+    showApp();
+  }
+  // 填充农场下拉框
+  const farmSelect = document.getElementById('fa-farm');
+  if (farmSelect) {
+    FARM_DATA.FARMS.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f.farmId;
+      opt.textContent = f.name;
+      farmSelect.appendChild(opt);
+    });
+  }
+});
+
+/* ============================================================
+   登录相关
+   ============================================================ */
+function switchLoginRole(role) {
+  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('form-super').style.display = role === 'super' ? 'block' : 'none';
+  document.getElementById('form-farm').style.display  = role === 'farm'  ? 'block' : 'none';
+}
+
+function doLogin() {
+  const superUser = document.getElementById('sa-user')?.value.trim();
+  const superPass = document.getElementById('sa-pass')?.value.trim();
+  const farmSelectVal = document.getElementById('fa-farm')?.value;
+  const farmUser = document.getElementById('fa-user')?.value.trim();
+  const farmPass = document.getElementById('fa-pass')?.value.trim();
+
+  // 超级管理员登录
+  if (currentRole === 'super' || document.getElementById('form-super').style.display !== 'none') {
+    const admin = FARM_DATA.SUPER_ADMINS.find(a => a.username === superUser && a.password === superPass);
+    if (!admin) return showToast('账号或密码错误', 'error');
+    currentRole = 'super_admin';
+    currentAdmin = admin;
+    persistLogin();
+    showApp();
+    showToast(`欢迎回来，${admin.nickname}！`, 'success');
+    return;
+  }
+
+  // 农场管理员登录
+  const farm = FARM_DATA.FARMS.find(f => f.farmId === farmSelectVal);
+  const admin = FARM_DATA.FARM_ADMINS.find(a => a.username === farmUser && a.password === farmPass && a.farmId === farmSelectVal);
+  if (!farmSelectVal || !farm) return showToast('请选择农场', 'error');
+  if (!admin) return showToast('账号或密码错误', 'error');
+  currentRole = 'farm_admin';
+  currentAdmin = admin;
+  currentFarmId = farm.farmId;
+  persistLogin();
+  showApp();
+  showToast(`欢迎回来，${admin.nickname}！`, 'success');
+}
+
+function persistLogin() {
+  localStorage.setItem('admin_role', currentRole);
+  localStorage.setItem('admin_info', JSON.stringify(currentAdmin));
+  if (currentFarmId) localStorage.setItem('admin_farm', currentFarmId);
+}
+
+function doLogout() {
+  currentRole = null; currentAdmin = null; currentFarmId = null;
+  localStorage.removeItem('admin_role');
+  localStorage.removeItem('admin_info');
+  localStorage.removeItem('admin_farm');
+  document.getElementById('app-layout').style.display = 'none';
+  document.getElementById('login-page').style.display = 'flex';
+  showToast('已退出登录');
+}
+
+function showRoleSwitch() {
+  if (currentRole === 'super_admin') {
+    // 切换到农场管理员（选择第一个有管理员的农场）
+    const farmWithAdmin = FARM_DATA.FARMS.find(f => FARM_DATA.FARM_ADMINS.some(a => a.farmId === f.farmId));
+    if (!farmWithAdmin) return showToast('当前没有可切换的农场管理员', 'error');
+    const fa = FARM_DATA.FARM_ADMINS.find(a => a.farmId === farmWithAdmin.farmId);
+    currentRole = 'farm_admin';
+    currentAdmin = fa;
+    currentFarmId = farmWithAdmin.farmId;
+  } else {
+    // 切换到超级管理员
+    currentRole = 'super_admin';
+    currentAdmin = FARM_DATA.SUPER_ADMINS[0];
+    currentFarmId = null;
+  }
+  persistLogin();
+  rebuildNav();
+  renderAllPages();
+  showToast(`已切换为${currentRole === 'super_admin' ? '超级管理员' : '农场管理员'}`);
+}
+
+/* ============================================================
+   显示主应用
+   ============================================================ */
+function showApp() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app-layout').style.display = 'flex';
+  rebuildNav();
+  renderAllPages();
+  navigateTo('dashboard');
+}
+
+/* ============================================================
+   导航
+   ============================================================ */
+const SUPER_NAV = [
+  { section: '概览', items: [
+    { id: 'dashboard', icon: '📊', label: '数据看板' },
+  ]},
+  { section: '运营管理', items: [
+    { id: 'plots', icon: '🗺️', label: '全局地块管理' },
+    { id: 'bookings', icon: '📅', label: '预约审核' },
+    { id: 'activities', icon: '🎉', label: '活动管理' },
+    { id: 'ai', icon: '🔍', label: 'AI识别管理' },
+    { id: 'messages', icon: '📢', label: '消息推送' },
+  ]},
+  { section: '商业', items: [
+    { id: 'finance', icon: '💰', label: '财务结算' },
+    { id: 'users', icon: '👥', label: '用户管理' },
+  ]},
+  { section: '系统', items: [
+    { id: 'farms', icon: '🏡', label: '农场管理' },
+    { id: 'tenants', icon: '🏢', label: '租户管理' },
+    { id: 'logs', icon: '📋', label: '系统日志' },
+    { id: 'settings', icon: '⚙️', label: '系统设置' },
+  ]},
+];
+
+const FARM_NAV = [
+  { section: '概览', items: [
+    { id: 'dashboard', icon: '📊', label: '数据看板' },
+  ]},
+  { section: '农场运营', items: [
+    { id: 'plots', icon: '🗺️', label: '地块管理' },
+    { id: 'bookings', icon: '📅', label: '预约审核' },
+    { id: 'activities', icon: '🎉', label: '活动管理' },
+    { id: 'ai', icon: '🔍', label: 'AI识别管理' },
+    { id: 'messages', icon: '📢', label: '消息推送' },
+  ]},
+  { section: '商业', items: [
+    { id: 'finance', icon: '💰', label: '财务结算' },
+    { id: 'users', icon: '👥', label: '用户管理' },
+  ]},
+  { section: '系统', items: [
+    { id: 'logs', icon: '📋', label: '系统日志' },
+  ]},
+];
+
+const PAGE_TITLES = {
+  dashboard: '数据看板', plots: '地块管理', bookings: '预约审核',
+  ai: 'AI识别管理', activities: '活动管理', messages: '消息推送',
+  users: '用户管理', finance: '财务结算', logs: '系统日志',
+  farms: '农场管理', tenants: '租户管理', settings: '系统设置'
+};
+
+function rebuildNav() {
+  const nav = document.getElementById('sidebar-nav');
+  const navData = currentRole === 'super_admin' ? SUPER_NAV : FARM_NAV;
+  const hiddenPages = currentRole === 'farm_admin' ? ['farms', 'tenants', 'settings'] : [];
+
+  // 更新角色标识
+  const badge = document.getElementById('current-role-badge');
+  badge.textContent = currentRole === 'super_admin' ? '超级管理员' : '农场管理员';
+  badge.className = 'role-badge ' + (currentRole === 'super_admin' ? 'super' : 'farm');
+
+  // 更新用户信息
+  document.getElementById('sa-avatar').textContent = currentAdmin.avatar || '👤';
+  document.getElementById('sa-name').textContent = currentAdmin.nickname || currentAdmin.username;
+  document.getElementById('sa-role-text').textContent = currentRole === 'super_admin' ? 'Super Admin' : (currentAdmin.farmId || '');
+
+  // 生成导航
+  nav.innerHTML = navData.map(section => `
+    <div class="nav-section">
+      <div class="nav-section-title">${section.section}</div>
+      ${section.items.filter(item => !hiddenPages.includes(item.id)).map(item => `
+        <div class="nav-item${currentPage === item.id ? ' active' : ''}" onclick="navigateTo('${item.id}')" data-nav="${item.id}">
+          <span class="nav-icon">${item.icon}</span>
+          <span>${item.label}</span>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+
+  // 预约审核角标
+  updateBadge();
+}
+
+function updateBadge() {
+  const pendingCount = FARM_DATA.bookings.filter(b => {
+    if (currentRole === 'super_admin') return b.status === 'pending';
+    return b.farmId === currentFarmId && b.status === 'pending';
+  }).length;
+  let badgeEl = document.querySelector('[data-nav="bookings"] .nav-badge');
+  if (pendingCount > 0) {
+    if (badgeEl) badgeEl.textContent = pendingCount;
+    else {
+      badgeEl = document.querySelector('[data-nav="bookings"]');
+      if (badgeEl) {
+        const badge = document.createElement('span');
+        badge.className = 'nav-badge';
+        badge.textContent = pendingCount;
+        badgeEl.appendChild(badge);
+      }
+    }
+  } else if (badgeEl) {
+    badgeEl.remove();
+  }
+}
+
+function navigateTo(page) {
+  // 权限检查
+  const hiddenPages = currentRole === 'farm_admin' ? ['farms', 'tenants', 'settings'] : [];
+  if (hiddenPages.includes(page)) {
+    showToast('您没有权限访问此页面', 'error');
+    return;
+  }
+  currentPage = page;
+  document.querySelectorAll('.page-module').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page)?.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`[data-nav="${page}"]`)?.classList.add('active');
+  document.getElementById('page-title').textContent = PAGE_TITLES[page] || page;
+  renderCurrentPage();
+}
+
+function renderCurrentPage() {
+  const renderers = {
+    dashboard: renderDashboard, plots: renderPlots, bookings: renderBookings,
+    ai: renderAI, activities: renderActivities, messages: renderMessages,
+    users: renderUsers, finance: renderFinance, logs: renderLogs,
+    farms: renderFarms, tenants: renderTenants, settings: renderSettings
+  };
+  (renderers[currentPage] || (()=>{}))();
+}
+
+function renderAllPages() {
+  Object.values({
+    dashboard, plots, bookings, ai, activities, messages,
+    users, finance, logs, farms, tenants, settings
+  }).forEach(fn => fn && fn());
+}
+
+/* ============================================================
+   1. 数据看板
+   ============================================================ */
+function renderDashboard() {
+  const plots = currentRole === 'super_admin' ? FARM_DATA.plots : FARM_DATA.plots.filter(p => p.farmId === currentFarmId);
+  const bookings = currentRole === 'super_admin' ? FARM_DATA.bookings : FARM_DATA.bookings.filter(b => b.farmId === currentFarmId);
+  const activities = currentRole === 'super_admin' ? FARM_DATA.activities : FARM_DATA.activities.filter(a => a.farmId === currentFarmId);
+  const users = currentRole === 'super_admin' ? [FARM_DATA.user] : (FARM_DATA.user.farmId === currentFarmId ? [FARM_DATA.user] : []);
+  const farms = currentRole === 'super_admin' ? FARM_DATA.FARMS : FARM_DATA.FARMS.filter(f => f.farmId === currentFarmId);
+
+  const totalRevenue = plots.filter(p => p.status === 'my').reduce((sum, p) => sum + p.price, 0);
+  const pendingBookings = bookings.filter(b => b.status === 'pending').length;
+  const availablePlots = plots.filter(p => p.status === 'available').length;
+
+  document.getElementById('page-dashboard').innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon green">🏡</div>
+        <div><div class="stat-value">${farms.length}</div><div class="stat-label">运营农场</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">🗺️</div>
+        <div><div class="stat-value">${plots.length}</div><div class="stat-label">总地块数</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber">👥</div>
+        <div><div class="stat-value">${users.length}</div><div class="stat-label">注册用户</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">💰</div>
+        <div><div class="stat-value">¥${totalRevenue.toLocaleString()}</div><div class="stat-label">认养总收入</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">📅</div>
+        <div><div class="stat-value">${pendingBookings}</div><div class="stat-label">待审核预约</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">🎉</div>
+        <div><div class="stat-value">${activities.length}</div><div class="stat-label">进行中活动</div></div>
+      </div>
+    </div>
+
+    <div class="three-col" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">📈 地块状态分布</div><div class="card-subtitle">按认养状态统计</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:24px;padding:10px 0;">
+          <canvas id="chart-plots" width="200" height="200"></canvas>
+          <div style="flex:1;">
+            ${[
+              { label: '可认养', count: plots.filter(p=>p.status==='available').length, color: 'var(--green-400)' },
+              { label: '已认养', count: plots.filter(p=>p.status==='my').length, color: 'var(--green-600)' },
+              { label: '已预约', count: plots.filter(p=>p.status==='reserved').length, color: 'var(--amber-500)' },
+            ].map(s => `
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <div style="width:12px;height:12px;border-radius:3px;background:${s.color};flex-shrink:0;"></div>
+                <span style="flex:1;font-size:13px;color:var(--gray-600);">${s.label}</span>
+                <span style="font-size:15px;font-weight:800;color:var(--gray-900);">${s.count}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">📅 预约状态</div><div class="card-subtitle">最近预约处理情况</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;padding:10px 0;">
+          ${[
+            { label: '待审核', count: bookings.filter(b=>b.status==='pending').length, color: 'var(--amber-500)', icon: '⏳' },
+            { label: '已通过', count: bookings.filter(b=>b.status==='approved').length, color: 'var(--green-500)', icon: '✅' },
+            { label: '已拒绝', count: bookings.filter(b=>b.status==='rejected').length, color: 'var(--red-500)', icon: '❌' },
+          ].map(s => `
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-size:20px;">${s.icon}</span>
+              <div style="flex:1;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-size:13px;font-weight:600;color:var(--gray-700);">${s.label}</span>
+                  <span style="font-size:13px;font-weight:700;color:${s.color};">${s.count}</span>
+                </div>
+                <div style="height:6px;background:var(--gray-100);border-radius:3px;overflow:hidden;">
+                  <div style="height:100%;width:${bookings.length ? (s.count/bookings.length*100) : 0}%;background:${s.color};border-radius:3px;transition:width .6s ease;"></div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">🌱 作物分布</div><div class="card-subtitle">各作物种植面积</div></div>
+        </div>
+        <div style="padding:10px 0;">
+          ${[...new Map(plots.filter(p=>p.crop).map(p=>[p.crop,p])).values()].map(crop => {
+            const totalArea = plots.filter(p=>p.crop===crop.crop).reduce((s,p)=>s+p.area,0);
+            const pct = Math.round(totalArea / plots.filter(p=>p.area).reduce((s,p)=>s+p.area,0) * 100) || 0;
+            return `
+              <div style="margin-bottom:14px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-size:13px;font-weight:600;">${crop.cropIcon} ${crop.crop}</span>
+                  <span style="font-size:12px;color:var(--gray-500);">${totalArea}㎡ (${pct}%)</span>
+                </div>
+                <div style="height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden;">
+                  <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--green-400),var(--green-500));border-radius:4px;"></div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">🕐 近期活动</div><div class="card-subtitle">即将开始的活动</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          ${activities.slice(0,4).map(a => `
+            <div style="display:flex;gap:12px;align-items:center;padding:10px;background:var(--gray-50);border-radius:var(--radius);">
+              <div style="font-size:32px;width:44px;height:44px;background:var(--green-50);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;">${a.tags[0]||'🎉'}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:700;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.title}</div>
+                <div style="font-size:11px;color:var(--gray-500);margin-top:2px;">📅 ${a.date} · ${a.enrolled}/${a.quota}人</div>
+              </div>
+            </div>
+          `).join('')}
+          ${activities.length === 0 ? '<div class="empty-state"><div class="icon">🎉</div><p>暂无活动</p></div>' : ''}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 绘制地块状态环形图
+  setTimeout(() => {
+    const canvas = document.getElementById('chart-plots');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = 200 * dpr; canvas.height = 200 * dpr;
+    ctx.scale(dpr, dpr);
+    const cx = 100, cy = 100, r = 70, lineWidth = 20;
+    const data = [
+      { value: plots.filter(p=>p.status==='available').length, color: '#4ade80' },
+      { value: plots.filter(p=>p.status==='my').length, color: '#16a34a' },
+      { value: plots.filter(p=>p.status==='reserved').length, color: '#f59e0b' },
+    ];
+    const total = data.reduce((s,d) => s + d.value, 0) || 1;
+    let startAngle = -Math.PI/2;
+    data.forEach(d => {
+      const slice = (d.value / total) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, startAngle, startAngle + slice);
+      ctx.strokeStyle = d.color;
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      startAngle += slice;
+    });
+    // 中心文字
+    ctx.fillStyle = '#111827';
+    ctx.font = 'bold 28px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(total, cx, cy - 8);
+    ctx.font = '12px sans-serif';
+    ctx.fillStyle = '#6b7280';
+    ctx.fillText('地块', cx, cy + 14);
+  }, 50);
+}
+
+/* ============================================================
+   2. 地块管理
+   ============================================================ */
+function renderPlots() {
+  const plots = currentRole === 'super_admin' ? FARM_DATA.plots : FARM_DATA.plots.filter(p => p.farmId === currentFarmId);
+  const farms = FARM_DATA.FARMS;
+
+  document.getElementById('page-plots').innerHTML = `
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="搜索地块编号、作物..." oninput="filterPlots(this.value)">
+      </div>
+      <select class="filter-select" onchange="filterPlotsByFarm(this.value)">
+        <option value="all">全部农场</option>
+        ${farms.map(f => `<option value="${f.farmId}">${f.name}</option>`).join('')}
+      </select>
+      <select class="filter-select" onchange="filterPlotsByStatus(this.value)">
+        <option value="all">全部状态</option>
+        <option value="available">可认养</option>
+        <option value="my">已认养</option>
+        <option value="reserved">已预约</option>
+      </select>
+      <button class="btn btn-primary btn-sm" onclick="openPlotEditModal()">+ 新增地块</button>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>编号</th><th>所属农场</th><th>作物</th><th>面积</th><th>价格</th><th>状态</th><th>地图位置</th><th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="plots-tbody">
+          ${plots.map(p => {
+            const farm = farms.find(f => f.farmId === p.farmId);
+            const statusMap = { available: ['可认养','tag-green'], my: ['我的','tag-blue'], reserved: ['已预约','tag-amber'] };
+            const [stext, scls] = statusMap[p.status] || ['未知','tag-gray'];
+            return `
+              <tr>
+                <td><strong>${p.plotNo}</strong></td>
+                <td>${farm ? farm.name : p.farmId}</td>
+                <td>${p.cropIcon} ${p.crop || '未种植'}</td>
+                <td>${p.area} ${p.unit}</td>
+                <td><strong>¥${p.price}</strong></td>
+                <td><span class="tag ${scls}">${stext}</span></td>
+                <td style="font-size:12px;color:var(--gray-500);">X:${p.mapX}% Y:${p.mapY}% ${p.mapW}×${p.mapH}</td>
+                <td>
+                  <div class="action-group">
+                    <div class="action-btn edit" onclick='openPlotEditModal(${JSON.stringify(p).replace(/'/g,"&#39;")})' title="编辑">✏️</div>
+                    <div class="action-btn delete" onclick="deletePlot('${p.id}')" title="删除">🗑️</div>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <div class="page-info">共 ${plots.length} 条记录</div>
+      <div class="page-btns">
+        <div class="page-btn active">1</div>
+      </div>
+    </div>
+  `;
+}
+
+function filterPlots(q) {
+  const rows = document.querySelectorAll('#plots-tbody tr');
+  rows.forEach(row => { row.style.display = row.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none'; });
+}
+function filterPlotsByFarm(farmId) {
+  const rows = document.querySelectorAll('#plots-tbody tr');
+  rows.forEach(row => {
+    if (farmId === 'all') { row.style.display = ''; return; }
+    row.style.display = row.cells[1].textContent.includes(getFarmName(farmId)) ? '' : 'none';
+  });
+}
+function filterPlotsByStatus(status) {
+  const rows = document.querySelectorAll('#plots-tbody tr');
+  const statusText = { available: '可认养', my: '我的', reserved: '已预约' };
+  rows.forEach(row => {
+    if (status === 'all') { row.style.display = ''; return; }
+    row.style.display = row.querySelector('.tag')?.textContent.trim() === statusText[status] ? '' : 'none';
+  });
+}
+function getFarmName(farmId) { return FARM_DATA.FARMS.find(f=>f.farmId===farmId)?.name || farmId; }
+
+function openPlotEditModal(plot) {
+  editingPlotId = plot ? plot.id : null;
+  const isNew = !plot;
+  document.getElementById('modal-plot-edit-title').textContent = isNew ? '新增地块' : '编辑地块';
+  document.getElementById('modal-plot-edit-body').innerHTML = `
+    <div class="form-group"><label>地块编号</label><input class="form-input" id="ep-plotNo" value="${plot?.plotNo || ''}" placeholder="如 A-03"></div>
+    <div class="form-group"><label>所属农场</label>
+      <select class="form-select" id="ep-farmId">
+        ${FARM_DATA.FARMS.map(f => `<option value="${f.farmId}" ${plot?.farmId===f.farmId?'selected':''}>${f.name}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group"><label>作物</label><input class="form-input" id="ep-crop" value="${plot?.crop || ''}" placeholder="如 小番茄"></div>
+    <div class="form-group"><label>作物图标 (Emoji)</label><input class="form-input" id="ep-cropIcon" value="${plot?.cropIcon || '🌱'}" placeholder="🍅"></div>
+    <div class="two-col" style="display:grid;gap:10px;margin-bottom:0;">
+      <div class="form-group"><label>面积</label><input class="form-input" id="ep-area" type="number" value="${plot?.area || 20}"></div>
+      <div class="form-group"><label>单位</label>
+        <select class="form-select" id="ep-unit"><option value="平米" ${plot?.unit==='平米'?'selected':''}>平米</option><option value="季" ${plot?.unit==='季'?'selected':''}>季</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label>认养价格 (元)</label><input class="form-input" id="ep-price" type="number" value="${plot?.price || 0}"></div>
+    <div class="form-group"><label>状态</label>
+      <select class="form-select" id="ep-status">
+        <option value="available" ${plot?.status==='available'?'selected':''}>可认养</option>
+        <option value="my" ${plot?.status==='my'?'selected':''}>已认养</option>
+        <option value="reserved" ${plot?.status==='reserved'?'selected':''}>已预约</option>
+      </select>
+    </div>
+    <div class="form-group"><label>位置说明</label><input class="form-input" id="ep-location" value="${plot?.location || ''}" placeholder="如 农场东区·阳光带"></div>
+    <div style="background:var(--green-50);border-radius:var(--radius);padding:14px;margin-bottom:0;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--green-800);">🗺️ 地图显示设置</div>
+      <div class="two-col" style="display:grid;gap:10px;margin-bottom:0;">
+        <div class="form-group" style="margin:0;"><label>X (%)</label><input class="form-input" id="ep-mapX" type="number" value="${plot?.mapX || 5}" min="0" max="90"></div>
+        <div class="form-group" style="margin:0;"><label>Y (%)</label><input class="form-input" id="ep-mapY" type="number" value="${plot?.mapY || 5}" min="0" max="90"></div>
+      </div>
+      <div class="two-col" style="display:grid;gap:10px;margin-bottom:0;">
+        <div class="form-group" style="margin:0;"><label>宽度 (%)</label><input class="form-input" id="ep-mapW" type="number" value="${plot?.mapW || 25}" min="5" max="80"></div>
+        <div class="form-group" style="margin:0;"><label>高度 (%)</label><input class="form-input" id="ep-mapH" type="number" value="${plot?.mapH || 35}" min="5" max="80"></div>
+      </div>
+      <div class="form-group" style="margin:0;margin-top:10px;"><label>地图颜色</label>
+        <input type="color" id="ep-mapColor" value="${plot?.mapColor || '#86efac'}" style="width:100%;height:36px;border:1.5px solid var(--gray-200);border-radius:var(--radius);cursor:pointer;padding:2px;">
+      </div>
+    </div>
+  `;
+  openModal('modal-plot-edit');
+}
+
+function savePlotEdit() {
+  const plotData = {
+    plotNo: document.getElementById('ep-plotNo').value.trim(),
+    farmId: document.getElementById('ep-farmId').value,
+    crop: document.getElementById('ep-crop').value.trim(),
+    cropIcon: document.getElementById('ep-cropIcon').value.trim() || '🌱',
+    area: parseInt(document.getElementById('ep-area').value) || 20,
+    unit: document.getElementById('ep-unit').value,
+    price: parseInt(document.getElementById('ep-price').value) || 0,
+    status: document.getElementById('ep-status').value,
+    location: document.getElementById('ep-location').value.trim(),
+    mapX: parseInt(document.getElementById('ep-mapX').value) || 5,
+    mapY: parseInt(document.getElementById('ep-mapY').value) || 5,
+    mapW: parseInt(document.getElementById('ep-mapW').value) || 25,
+    mapH: parseInt(document.getElementById('ep-mapH').value) || 35,
+    mapColor: document.getElementById('ep-mapColor').value,
+  };
+  if (!plotData.plotNo) return showToast('请输入地块编号', 'error');
+  if (!plotData.crop) return showToast('请输入作物名称', 'error');
+
+  if (editingPlotId) {
+    // 编辑
+    const idx = FARM_DATA.plots.findIndex(p => p.id === editingPlotId);
+    if (idx !== -1) {
+      FARM_DATA.plots[idx] = { ...FARM_DATA.plots[idx], ...plotData };
+    }
+  } else {
+    // 新增
+    FARM_DATA.plots.push({ id: 'p' + Date.now(), ...plotData, plantDate: null, harvestDate: null, photos: [], aiResult: null, diary: [] });
+  }
+  closeModal('modal-plot-edit');
+  renderPlots();
+  showToast(editingPlotId ? '✅ 地块已更新' : '✅ 地块已添加', 'success');
+  editingPlotId = null;
+}
+
+function deletePlot(id) {
+  if (!confirm('确定要删除这个地块吗？')) return;
+  const idx = FARM_DATA.plots.findIndex(p => p.id === id);
+  if (idx !== -1) FARM_DATA.plots.splice(idx, 1);
+  renderPlots();
+  showToast('🗑️ 地块已删除');
+}
+
+/* ============================================================
+   3. 预约审核
+   ============================================================ */
+function renderBookings() {
+  let bookings = currentRole === 'super_admin' ? FARM_DATA.bookings : FARM_DATA.bookings.filter(b => b.farmId === currentFarmId);
+
+  document.getElementById('page-bookings').innerHTML = `
+    <div class="toolbar">
+      <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="搜索用户、地块..." oninput="filterBookings(this.value)"></div>
+      <select class="filter-select" onchange="filterBookingsByStatus(this.value)">
+        <option value="all">全部状态</option>
+        <option value="pending">待审核</option>
+        <option value="approved">已通过</option>
+        <option value="rejected">已拒绝</option>
+      </select>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr><th>预约人</th><th>地块</th><th>日期</th><th>时段</th><th>人数</th><th>状态</th><th>备注</th><th>操作</th></tr>
+        </thead>
+        <tbody id="bookings-tbody">
+          ${bookings.map(b => {
+            const plot = FARM_DATA.plots.find(p => p.id === b.plotId);
+            const statusMap = { pending: ['⏳ 待审核','tag-amber'], approved: ['✅ 已通过','tag-green'], rejected: ['❌ 已拒绝','tag-red'] };
+            const [stext, scls] = statusMap[b.status] || ['未知','tag-gray'];
+            return `
+              <tr>
+                <td>用户 ${b.userId.slice(-3)}</td>
+                <td>${plot ? plot.cropIcon + ' ' + plot.plotNo : '未知'}</td>
+                <td>📅 ${b.date}</td>
+                <td>⏰ ${b.timeSlot}</td>
+                <td>👥 ${b.people}</td>
+                <td><span class="tag ${scls}">${stext}</span></td>
+                <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--gray-500);">${b.note || '-'}</td>
+                <td>
+                  <div class="action-group">
+                    <div class="action-btn" onclick="openBookingReview('${b.id}')" title="审核">👁️</div>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    ${bookings.length === 0 ? '<div class="empty-state" style="margin-top:20px;"><div class="icon">📅</div><p>暂无预约记录</p></div>' : ''}
+  `;
+}
+
+function filterBookings(q) {
+  const rows = document.querySelectorAll('#bookings-tbody tr');
+  rows.forEach(row => { row.style.display = row.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none'; });
+}
+function filterBookingsByStatus(status) {
+  const rows = document.querySelectorAll('#bookings-tbody tr');
+  const statusText = { pending: '⏳ 待审核', approved: '✅ 已通过', rejected: '❌ 已拒绝' };
+  rows.forEach(row => {
+    if (status === 'all') { row.style.display = ''; return; }
+    row.style.display = row.querySelector('.tag')?.textContent.trim() === statusText[status] ? '' : 'none';
+  });
+}
+
+function openBookingReview(bookingId) {
+  reviewingBookingId = bookingId;
+  const booking = FARM_DATA.bookings.find(b => b.id === bookingId);
+  if (!booking) return;
+  const plot = FARM_DATA.plots.find(p => p.id === booking.plotId);
+  document.getElementById('modal-booking-review-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div style="background:var(--green-50);border-radius:var(--radius);padding:14px;text-align:center;">
+        <div style="font-size:28px;">${plot ? plot.cropIcon : '🌱'}</div>
+        <div style="font-size:13px;font-weight:700;margin-top:4px;">${plot ? plot.plotNo + ' ' + plot.crop : '未知地块'}</div>
+      </div>
+      <div style="background:var(--blue-50);border-radius:var(--radius);padding:14px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:var(--blue-600);">${booking.people}</div>
+        <div style="font-size:12px;color:var(--gray-500);margin-top:2px;">同行人数</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray-500);">预约日期</span><span style="font-weight:600;">📅 ${booking.date}</span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray-500);">时间段</span><span style="font-weight:600;">⏰ ${booking.timeSlot}</span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray-500);">提交时间</span><span style="font-weight:600;">${booking.createTime}</span></div>
+      ${booking.note ? `<div style="margin-top:4px;"><span style="color:var(--gray-500);">备注：</span><span>${booking.note}</span></div>` : ''}
+    </div>
+  `;
+  openModal('modal-booking-review');
+}
+
+function reviewBooking(status) {
+  const booking = FARM_DATA.bookings.find(b => b.id === reviewingBookingId);
+  if (!booking) return;
+  booking.status = status;
+  closeModal('modal-booking-review');
+  renderBookings();
+  updateBadge();
+  showToast(status === 'approved' ? '✅ 已通过预约' : '❌ 已拒绝预约');
+  reviewingBookingId = null;
+}
+
+/* ============================================================
+   4. AI识别管理
+   ============================================================ */
+function renderAI() {
+  const plots = currentRole === 'super_admin' ? FARM_DATA.plots : FARM_DATA.plots.filter(p => p.farmId === currentFarmId);
+  const aiPlots = plots.filter(p => p.aiResult);
+
+  document.getElementById('page-ai').innerHTML = `
+    <div class="stats-grid" style="margin-bottom:20px;">
+      <div class="stat-card">
+        <div class="stat-icon green">🔍</div>
+        <div><div class="stat-value">${aiPlots.length}</div><div class="stat-label">已识别地块</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">💚</div>
+        <div><div class="stat-value">${aiPlots.length ? Math.round(aiPlots.reduce((s,p)=>s+p.aiResult.healthScore,0)/aiPlots.length) : 0}</div><div class="stat-label">平均健康分</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">⚠️</div>
+        <div><div class="stat-value">${aiPlots.filter(p=>p.aiResult.healthScore<70).length}</div><div class="stat-label">需关注地块</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div><div class="card-title">🤖 AI识别记录</div><div class="card-subtitle">所有地块的AI诊断结果</div></div>
+        <button class="btn btn-primary btn-sm" onclick="showToast('AI批量识别功能开发中')">🔄 批量识别</button>
+      </div>
+      ${aiPlots.length === 0 ? '<div class="empty-state"><div class="icon">🔍</div><p>暂无AI识别数据</p></div>' : `
+        <div class="table-container">
+          <table>
+            <thead><tr><th>地块</th><th>农场</th><th>健康度</th><th>健康分</th><th>成熟度</th><th>病虫害</th><th>AI建议</th><th>操作</th></tr></thead>
+            <tbody>
+              ${aiPlots.map(p => {
+                const farm = FARM_DATA.FARMS.find(f=>f.farmId===p.farmId);
+                const healthColor = p.aiResult.healthScore >= 80 ? 'var(--green-600)' : p.aiResult.healthScore >= 60 ? 'var(--amber-600)' : 'var(--red-500)';
+                return `
+                  <tr>
+                    <td><strong>${p.plotNo}</strong></td>
+                    <td>${farm ? farm.name : p.farmId}</td>
+                    <td><span style="font-weight:700;color:${healthColor};">${p.aiResult.health}</span></td>
+                    <td>
+                      <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="flex:1;height:6px;background:var(--gray-100);border-radius:3px;min-width:60px;">
+                          <div style="height:100%;width:${p.aiResult.healthScore}%;background:${healthColor};border-radius:3px;"></div>
+                        </div>
+                        <span style="font-weight:700;font-size:13px;color:${healthColor};">${p.aiResult.healthScore}</span>
+                      </div>
+                    </td>
+                    <td>${p.aiResult.maturity}%</td>
+                    <td><span class="tag ${p.aiResult.disease.includes('未发现') ? 'tag-green' : 'tag-red'}">${p.aiResult.disease}</span></td>
+                    <td style="max-width:200px;font-size:12px;color:var(--gray-500);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.aiResult.advice[0] || '-'}</td>
+                    <td>
+                      <div class="action-group">
+                        <div class="action-btn edit" onclick="showToast('查看 ${p.plotNo} 详细报告')" title="查看详情">📋</div>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `}
+    </div>
+  `;
+}
+
+/* ============================================================
+   5. 活动管理
+   ============================================================ */
+function renderActivities() {
+  let activities = currentRole === 'super_admin' ? FARM_DATA.activities : FARM_DATA.activities.filter(a => a.farmId === currentFarmId);
+  const farms = FARM_DATA.FARMS;
+
+  document.getElementById('page-activities').innerHTML = `
+    <div class="toolbar">
+      <button class="btn btn-primary btn-sm" onclick="showToast('新建活动功能开发中')">+ 新建活动</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">
+      ${activities.map(a => {
+        const farm = farms.find(f=>f.farmId===a.farmId);
+        const pct = Math.round(a.enrolled / a.quota * 100);
+        return `
+          <div class="card" style="padding:0;overflow:hidden;">
+            <div style="height:120px;background:linear-gradient(135deg,var(--green-400),var(--green-600));display:flex;align-items:center;justify-content:center;font-size:48px;">${a.tags[0]||'🎉'}</div>
+            <div style="padding:16px;">
+              <div style="font-size:15px;font-weight:800;margin-bottom:6px;">${a.title}</div>
+              <div style="font-size:12px;color:var(--gray-500);margin-bottom:10px;">📅 ${a.date} · 📍 ${a.location}</div>
+              ${farm ? `<div style="font-size:11px;color:var(--gray-400);margin-bottom:10px;">🏡 ${farm.name}</div>` : ''}
+              <div style="margin-bottom:8px;">
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+                  <span style="color:var(--gray-500);">报名进度</span>
+                  <span style="font-weight:700;">${a.enrolled}/${a.quota} (${pct}%)</span>
+                </div>
+                <div style="height:6px;background:var(--gray-100);border-radius:3px;overflow:hidden;">
+                  <div style="height:100%;width:${pct}%;background:var(--green-500);border-radius:3px;"></div>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                ${a.tags.map(t => `<span class="tag tag-gray">${t}</span>`).join('')}
+              </div>
+              <div style="display:flex;gap:6px;margin-top:12px;">
+                <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="showToast('编辑活动：${a.title}')">编辑</button>
+                <button class="btn btn-outline btn-sm" onclick="showToast('查看报名列表')">报名</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+      ${activities.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;"><div class="icon">🎉</div><p>暂无活动</p></div>' : ''}
+    </div>
+  `;
+}
+
+/* ============================================================
+   6. 消息推送
+   ============================================================ */
+function renderMessages() {
+  document.getElementById('page-messages').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">📤 发送消息</div><div class="card-subtitle">向用户推送系统通知</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="form-group" style="margin:0;">
+            <label>快速模板</label>
+            <select class="form-select" id="msg-template" onchange="applyTemplate(this.value)">
+              <option value="">-- 选择模板 --</option>
+              <option value="harvest">🍎 丰收提醒</option>
+              <option value="weather">🌧️ 天气提醒</option>
+              <option value="activity">🎉 新活动上线</option>
+              <option value="system">🔧 系统维护通知</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label>接收范围</label>
+            <select class="form-select" id="quick-target">
+              <option value="all">全部用户</option>
+              <option value="farm">本农场用户</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label>消息标题</label>
+            <input type="text" class="form-input" id="quick-msg-title" placeholder="输入标题">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label>消息内容</label>
+            <textarea class="form-input" id="quick-msg-content" rows="4" placeholder="输入消息内容..." style="resize:vertical;"></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="openSendMsgModal()">📤 高级发送</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">📨 最近通知</div><div class="card-subtitle">历史推送记录</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${[
+            { title: '🍎 您的番茄可以采摘了！', time: '2026-11-08', target: '地块认养人', type: 'harvest' },
+            { title: '🎉 初冬草莓采摘节报名开始', time: '2026-11-05', target: '全部用户', type: 'activity' },
+            { title: '🌧️ 明日降温提醒', time: '2026-11-03', target: '本农场用户', type: 'weather' },
+            { title: '🔧 系统升级完成', time: '2026-10-30', target: '全部用户', type: 'system' },
+          ].map(m => `
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--gray-50);border-radius:var(--radius);">
+              <span style="font-size:20px;">${m.type === 'harvest' ? '🍎' : m.type === 'activity' ? '🎉' : m.type === 'weather' ? '🌧️' : '🔧'}</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:600;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.title}</div>
+                <div style="font-size:11px;color:var(--gray-500);">${m.time} · ${m.target}</div>
+              </div>
+            </div>
+          `).join('')}
+          <div class="empty-state" style="padding:20px;"><p style="font-size:12px;">暂无更多记录</p></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function applyTemplate(type) {
+  const templates = {
+    harvest: { title: '🍎 您的作物可以采摘了！', content: '亲爱的用户，您认养地块的作物已经成熟，欢迎前来采摘！\n\n请提前预约，我们为您准备好采摘工具。' },
+    weather: { title: '🌧️ 天气变化提醒', content: '亲爱的用户，未来几天将有降温/降雨，请做好防护措施。\n\n如需帮助请联系农场管理员。' },
+    activity: { title: '🎉 新活动上线啦！', content: '亲爱的用户，农场最新活动已上线，快来报名参加吧！\n\n活动详情请查看农场社区。' },
+    system: { title: '🔧 系统维护通知', content: '亲爱的用户，系统将于近期进行升级维护，届时部分功能可能暂时不可用。\n\n给您带来不便，敬请谅解。' },
+  };
+  const t = templates[type];
+  if (t) {
+    document.getElementById('quick-msg-title').value = t.title;
+    document.getElementById('quick-msg-content').value = t.content;
+  }
+}
+
+function openSendMsgModal() {
+  document.getElementById('msg-title').value = document.getElementById('quick-msg-title').value;
+  document.getElementById('msg-content').value = document.getElementById('quick-msg-content').value;
+  document.getElementById('msg-target').value = document.getElementById('quick-target').value;
+  openModal('modal-send-msg');
+}
+
+function sendMessage() {
+  const title = document.getElementById('msg-title').value.trim();
+  const content = document.getElementById('msg-content').value.trim();
+  if (!title || !content) return showToast('请填写完整消息内容', 'error');
+  closeModal('modal-send-msg');
+  showToast('📤 消息已发送！', 'success');
+  document.getElementById('quick-msg-title').value = '';
+  document.getElementById('quick-msg-content').value = '';
+}
+
+/* ============================================================
+   7. 用户管理
+   ============================================================ */
+function renderUsers() {
+  // 模拟用户数据
+  const mockUsers = [
+    { id: 'u001', phone: '138****8888', nickname: '农场小达人', avatar: '🌾', farm: '阳光开心农场', plots: 1, regDate: '2026-09-01', status: 'active' },
+    { id: 'u002', phone: '139****6666', nickname: '果果妈妈', avatar: '👩', farm: '阳光开心农场', plots: 1, regDate: '2026-09-10', status: 'active' },
+    { id: 'u003', phone: '137****5555', nickname: '种菜小白', avatar: '👨‍🌾', farm: '阳光开心农场', plots: 1, regDate: '2026-09-15', status: 'active' },
+    { id: 'u004', phone: '136****4444', nickname: '田园梦想家', avatar: '👩‍🎓', farm: '阳光开心农场', plots: 1, regDate: '2026-09-20', status: 'active' },
+  ];
+
+  document.getElementById('page-users').innerHTML = `
+    <div class="toolbar">
+      <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="搜索用户昵称、手机号..." oninput="filterUsers(this.value)"></div>
+      <select class="filter-select" onchange="filterUsersByFarm(this.value)">
+        <option value="all">全部农场</option>
+        ${FARM_DATA.FARMS.map(f => `<option value="${f.farmId}">${f.name}</option>`).join('')}
+      </select>
+      <select class="filter-select" onchange="filterUsersByStatus(this.value)">
+        <option value="all">全部状态</option>
+        <option value="active">正常</option>
+        <option value="banned">已禁用</option>
+      </select>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr><th>用户</th><th>手机号</th><th>所属农场</th><th>认养地块</th><th>注册日期</th><th>状态</th><th>操作</th></tr>
+        </thead>
+        <tbody id="users-tbody">
+          ${mockUsers.map(u => `
+            <tr>
+              <td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:20px;">${u.avatar}</span><span style="font-weight:600;">${u.nickname}</span></div></td>
+              <td>${u.phone}</td>
+              <td>${u.farm}</td>
+              <td>${u.plots} 块</td>
+              <td>${u.regDate}</td>
+              <td><span class="tag tag-green">正常</span></td>
+              <td>
+                <div class="action-group">
+                  <div class="action-btn edit" onclick="showToast('查看用户详情：${u.nickname}')" title="详情">👁️</div>
+                  <div class="action-btn" onclick="showToast('发送消息给 ${u.nickname}')" title="发消息">💬</div>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <div class="page-info">共 ${mockUsers.length} 位用户</div>
+      <div class="page-btns"><div class="page-btn active">1</div></div>
+    </div>
+  `;
+}
+
+function filterUsers(q) {
+  const rows = document.querySelectorAll('#users-tbody tr');
+  rows.forEach(row => { row.style.display = row.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none'; });
+}
+function filterUsersByFarm(farmId) {
+  const rows = document.querySelectorAll('#users-tbody tr');
+  rows.forEach(row => {
+    if (farmId === 'all') { row.style.display = ''; return; }
+    row.style.display = row.cells[2].textContent.includes(getFarmName(farmId)) ? '' : 'none';
+  });
+}
+function filterUsersByStatus(status) {
+  const rows = document.querySelectorAll('#users-tbody tr');
+  const statusText = { active: '正常', banned: '已禁用' };
+  rows.forEach(row => {
+    if (status === 'all') { row.style.display = ''; return; }
+    row.style.display = row.querySelector('.tag')?.textContent.trim() === statusText[status] ? '' : 'none';
+  });
+}
+
+/* ============================================================
+   8. 财务结算
+   ============================================================ */
+function renderFinance() {
+  const plots = currentRole === 'super_admin' ? FARM_DATA.plots : FARM_DATA.plots.filter(p => p.farmId === currentFarmId);
+  const myPlots = plots.filter(p => p.status === 'my');
+  const totalRevenue = myPlots.reduce((s, p) => s + p.price, 0);
+  const avgPrice = myPlots.length ? Math.round(totalRevenue / myPlots.length) : 0;
+
+  // 按农场统计
+  const farmStats = FARM_DATA.FARMS.map(f => {
+    const fp = FARM_DATA.plots.filter(p => p.farmId === f.farmId);
+    const revenue = fp.filter(p=>p.status==='my').reduce((s,p)=>s+p.price,0);
+    return { name: f.name, total: fp.length, adopted: fp.filter(p=>p.status==='my').length, revenue };
+  });
+
+  document.getElementById('page-finance').innerHTML = `
+    <div class="stats-grid" style="margin-bottom:24px;">
+      <div class="stat-card">
+        <div class="stat-icon green">💰</div>
+        <div><div class="stat-value">¥${totalRevenue.toLocaleString()}</div><div class="stat-label">总认养收入</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">🗺️</div>
+        <div><div class="stat-value">${myPlots.length}/${plots.length}</div><div class="stat-label">已认养/总地块</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber">📊</div>
+        <div><div class="stat-value">¥${avgPrice}</div><div class="stat-label">平均认养价</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">🏡</div>
+        <div><div class="stat-value">${currentRole==='super_admin' ? FARM_DATA.FARMS.length : 1}</div><div class="stat-label">运营农场数</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div><div class="card-title">💵 地块认养明细</div><div class="card-subtitle">所有已认养地块的收入明细</div></div>
+      </div>
+      ${myPlots.length === 0 ? '<div class="empty-state"><div class="icon">💰</div><p>暂无认养收入</p></div>' : `
+        <div class="table-container">
+          <table>
+            <thead><tr><th>地块编号</th><th>农场</th><th>作物</th><th>面积</th><th>认养价格</th><th>认养人</th><th>认养日期</th></tr></thead>
+            <tbody>
+              ${myPlots.map(p => {
+                const farm = FARM_DATA.FARMS.find(f=>f.farmId===p.farmId);
+                return `
+                  <tr>
+                    <td><strong>${p.plotNo}</strong></td>
+                    <td>${farm ? farm.name : p.farmId}</td>
+                    <td>${p.cropIcon} ${p.crop}</td>
+                    <td>${p.area} ${p.unit}</td>
+                    <td><strong style="color:var(--green-600);">¥${p.price}</strong></td>
+                    <td>👤 用户***</td>
+                    <td>${p.plantDate || '-'}</td>
+                  </tr>
+                `;
+              }).join('')}
+              <tr style="background:var(--green-50);font-weight:700;">
+                <td colspan="4" style="text-align:right;">合计</td>
+                <td style="color:var(--green-600);font-size:16px;">¥${totalRevenue.toLocaleString()}</td>
+                <td colspan="2"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `}
+    </div>
+
+    ${currentRole === 'super_admin' ? `
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">🏡 各农场收入汇总</div></div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead><tr><th>农场名称</th><th>总地块</th><th>已认养</th><th>认养率</th><th>认养收入</th></tr></thead>
+          <tbody>
+            ${farmStats.map(f => {
+              const rate = f.total ? Math.round(f.adopted/f.total*100) : 0;
+              return `
+                <tr>
+                  <td><strong>${f.name}</strong></td>
+                  <td>${f.total}</td>
+                  <td>${f.adopted}</td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                      <div style="flex:1;height:6px;background:var(--gray-100);border-radius:3px;min-width:60px;">
+                        <div style="height:100%;width:${rate}%;background:var(--green-500);border-radius:3px;"></div>
+                      </div>
+                      <span style="font-weight:700;">${rate}%</span>
+                    </div>
+                  </td>
+                  <td><strong style="color:var(--green-600);">¥${f.revenue.toLocaleString()}</strong></td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    ` : ''}
+  `;
+}
+
+/* ============================================================
+   9. 系统日志
+   ============================================================ */
+function renderLogs() {
+  const mockLogs = [
+    { time: '2026-11-10 09:23:15', user: 'superadmin', role: '超级管理员', action: '登录系统', ip: '192.168.1.100', farm: '-' },
+    { time: '2026-11-10 09:15:42', user: 'farm_demo_admin', role: '农场管理员', action: '审核通过预约 b1', ip: '192.168.1.101', farm: '阳光开心农场' },
+    { time: '2026-11-09 16:30:00', user: 'u001', role: '普通用户', action: '认养地块 A-01', ip: '192.168.1.105', farm: '阳光开心农场' },
+    { time: '2026-11-09 14:20:33', user: 'farm_demo_admin', role: '农场管理员', action: '修改地块 B-01 价格为 ¥899', ip: '192.168.1.101', farm: '阳光开心农场' },
+    { time: '2026-11-09 10:05:18', user: 'superadmin', role: '超级管理员', action: '创建农场管理员 farm_demo_admin', ip: '192.168.1.100', farm: '-' },
+    { time: '2026-11-08 15:40:00', user: 'u002', role: '普通用户', action: '发布社区动态', ip: '192.168.1.108', farm: '阳光开心农场' },
+    { time: '2026-11-08 11:22:45', user: 'system', role: '系统', action: '自动清理过期验证码', ip: '-', farm: '-' },
+    { time: '2026-11-07 09:00:00', user: 'system', role: '系统', action: '每日数据备份完成', ip: '-', farm: '-' },
+  ];
+
+  document.getElementById('page-logs').innerHTML = `
+    <div class="toolbar">
+      <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="搜索操作、用户..." oninput="filterLogs(this.value)"></div>
+      <select class="filter-select" onchange="filterLogsByRole(this.value)">
+        <option value="all">全部角色</option>
+        <option value="超级管理员">超级管理员</option>
+        <option value="农场管理员">农场管理员</option>
+        <option value="普通用户">普通用户</option>
+        <option value="系统">系统</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="showToast('日志已导出')">📥 导出日志</button>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead><tr><th>时间</th><th>用户</th><th>角色</th><th>操作</th><th>IP</th><th>农场</th></tr></thead>
+        <tbody id="logs-tbody">
+          ${mockLogs.map(l => {
+            const roleColor = l.role === '超级管理员' ? 'tag-amber' : l.role === '农场管理员' ? 'tag-blue' : l.role === '系统' ? 'tag-gray' : 'tag-green';
+            return `
+              <tr>
+                <td style="font-size:12px;color:var(--gray-500);white-space:nowrap;">${l.time}</td>
+                <td><code style="font-size:12px;background:var(--gray-100);padding:2px 6px;border-radius:4px;">${l.user}</code></td>
+                <td><span class="tag ${roleColor}">${l.role}</span></td>
+                <td>${l.action}</td>
+                <td style="font-size:12px;color:var(--gray-500);">${l.ip}</td>
+                <td>${l.farm}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function filterLogs(q) {
+  const rows = document.querySelectorAll('#logs-tbody tr');
+  rows.forEach(row => { row.style.display = row.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none'; });
+}
+function filterLogsByRole(role) {
+  const rows = document.querySelectorAll('#logs-tbody tr');
+  rows.forEach(row => {
+    if (role === 'all') { row.style.display = ''; return; }
+    row.style.display = row.querySelector('.tag')?.textContent.trim() === role ? '' : 'none';
+  });
+}
+
+/* ============================================================
+   10. 农场管理（仅超管）
+   ============================================================ */
+function renderFarms() {
+  document.getElementById('page-farms').innerHTML = `
+    <div class="toolbar">
+      <button class="btn btn-primary btn-sm" onclick="showToast('新建农场功能开发中')">+ 新建农场</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;">
+      ${FARM_DATA.FARMS.map(f => {
+        const plotCount = FARM_DATA.plots.filter(p=>p.farmId===f.farmId).length;
+        const adminCount = FARM_DATA.FARM_ADMINS.filter(a=>a.farmId===f.farmId).length;
+        const adoptedCount = FARM_DATA.plots.filter(p=>p.farmId===f.farmId && p.status==='my').length;
+        return `
+          <div class="card">
+            <div style="height:100px;background:linear-gradient(135deg,var(--green-400),var(--green-600));border-radius:var(--radius) var(--radius) 0 0;margin:-20px -20px 16px;display:flex;align-items:center;justify-content:center;font-size:40px;">🌾</div>
+            <div style="font-size:16px;font-weight:800;margin-bottom:4px;">${f.name}</div>
+            <div style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">📍 ${f.address}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+              <span class="tag ${f.status==='active'?'tag-green':'tag-red'}">${f.status==='active'?'运营中':'已暂停'}</span>
+              <span class="tag tag-blue">${f.plan==='premium'?'高级版':f.plan==='enterprise'?'企业版':'基础版'}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+              <div style="text-align:center;padding:8px;background:var(--gray-50);border-radius:var(--radius-sm);">
+                <div style="font-size:18px;font-weight:800;color:var(--green-600);">${plotCount}</div>
+                <div style="font-size:11px;color:var(--gray-500);">地块</div>
+              </div>
+              <div style="text-align:center;padding:8px;background:var(--gray-50);border-radius:var(--radius-sm);">
+                <div style="font-size:18px;font-weight:800;color:var(--blue-600);">${adminCount}</div>
+                <div style="font-size:11px;color:var(--gray-500);">管理员</div>
+              </div>
+              <div style="text-align:center;padding:8px;background:var(--gray-50);border-radius:var(--radius-sm);">
+                <div style="font-size:18px;font-weight:800;color:var(--amber-600);">${adoptedCount}</div>
+                <div style="font-size:11px;color:var(--gray-500);">已认养</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--gray-400);margin-bottom:12px;">创建于 ${f.createdAt}</div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="showToast('编辑农场：${f.name}')">编辑</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('查看 ${f.name} 管理员')">管理员 (${adminCount})</button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+/* ============================================================
+   11. 租户管理（仅超管）
+   ============================================================ */
+function renderTenants() {
+  document.getElementById('page-tenants').innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">🏢 租户列表</div><div class="card-subtitle">管理所有农场租户</div></div>
+        <button class="btn btn-primary btn-sm" onclick="showToast('新建租户功能开发中')">+ 新增租户</button>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead><tr><th>租户ID</th><th>农场名称</th><th>套餐</th><th>状态</th><th>管理员数</th><th>创建时间</th><th>操作</th></tr></thead>
+          <tbody>
+            ${FARM_DATA.FARMS.map(f => {
+              const adminCount = FARM_DATA.FARM_ADMINS.filter(a=>a.farmId===f.farmId).length;
+              const planLabel = f.plan==='premium' ? '高级版' : f.plan==='enterprise' ? '企业版' : '基础版';
+              const planTag = f.plan==='premium' ? 'tag-blue' : f.plan==='enterprise' ? 'tag-amber' : 'tag-gray';
+              return `
+                <tr>
+                  <td><code style="font-size:12px;background:var(--gray-100);padding:2px 6px;border-radius:4px;">${f.farmId}</code></td>
+                  <td><strong>${f.name}</strong></td>
+                  <td><span class="tag ${planTag}">${planLabel}</span></td>
+                  <td><span class="tag ${f.status==='active'?'tag-green':'tag-red'}">${f.status==='active'?'运营中':'已暂停'}</span></td>
+                  <td>${adminCount}</td>
+                  <td>${f.createdAt}</td>
+                  <td>
+                    <div class="action-group">
+                      <div class="action-btn edit" onclick="showToast('编辑租户：${f.name}')" title="编辑">✏️</div>
+                      <div class="action-btn" onclick="showToast('查看 ${f.name} 详情')" title="详情">👁️</div>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   12. 系统设置（仅超管）
+   ============================================================ */
+function renderSettings() {
+  document.getElementById('page-settings').innerHTML = `
+    <div style="max-width:700px;">
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header"><div><div class="card-title">🔐 安全设置</div><div class="card-subtitle">超级管理员账号安全</div></div></div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="form-group" style="margin:0;"><label>当前密码</label><input type="password" class="form-input" placeholder="输入当前密码"></div>
+          <div class="form-group" style="margin:0;"><label>新密码</label><input type="password" class="form-input" placeholder="输入新密码"></div>
+          <div class="form-group" style="margin:0;"><label>确认新密码</label><input type="password" class="form-input" placeholder="再次输入新密码"></div>
+          <button class="btn btn-primary btn-sm" onclick="showToast('密码已更新','success')">更新密码</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header"><div><div class="card-title">⚙️ 系统参数</div><div class="card-subtitle">全局配置项</div></div></div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--gray-100);">
+            <div><div style="font-weight:600;">允许用户自主注册</div><div style="font-size:12px;color:var(--gray-500);">新用户可通过手机号验证码注册</div></div>
+            <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+              <input type="checkbox" checked style="opacity:0;width:0;height:0;">
+              <span style="position:absolute;inset:0;background:var(--green-500);border-radius:12px;transition:.2s;"></span>
+            </label>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--gray-100);">
+            <div><div style="font-weight:600;">预约需审核</div><div style="font-size:12px;color:var(--gray-500);">用户预约后需管理员审核通过</div></div>
+            <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+              <input type="checkbox" checked style="opacity:0;width:0;height:0;">
+              <span style="position:absolute;inset:0;background:var(--green-500);border-radius:12px;transition:.2s;"></span>
+            </label>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--gray-100);">
+            <div><div style="font-weight:600;">AI识别自动触发</div><div style="font-size:12px;color:var(--gray-500);">地块照片上传后自动AI分析</div></div>
+            <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+              <input type="checkbox" style="opacity:0;width:0;height:0;">
+              <span style="position:absolute;inset:0;background:var(--gray-300);border-radius:12px;transition:.2s;"></span>
+            </label>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;">
+            <div><div style="font-weight:600;">维护模式</div><div style="font-size:12px;color:var(--gray-500);">开启后普通用户无法访问</div></div>
+            <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+              <input type="checkbox" style="opacity:0;width:0;height:0;">
+              <span style="position:absolute;inset:0;background:var(--gray-300);border-radius:12px;transition:.2s;"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">🗂️ 数据管理</div><div class="card-subtitle">备份与恢复</div></div></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-secondary" onclick="showToast('数据备份中...','success')">📥 立即备份</button>
+          <button class="btn btn-outline" onclick="showToast('请选择备份文件')">📤 恢复数据</button>
+          <button class="btn btn-outline" onclick="showToast('缓存已清理')">🧹 清理缓存</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   工具函数
+   ============================================================ */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+// 点击遮罩关闭
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+
+function showToast(msg, type = '') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast show ' + type;
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function refreshData() {
+  showToast('🔄 数据已刷新');
+  renderCurrentPage();
+}
+
+// 登录页角色切换临时变量
+let loginRole = 'super';
+const origSwitchLoginRole = switchLoginRole;
+function switchLoginRole(role) {
+  loginRole = role;
+  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('form-super').style.display = role === 'super' ? 'block' : 'none';
+  document.getElementById('form-farm').style.display  = role === 'farm'  ? 'block' : 'none';
+}
+</script>
+</body>
+</html>
